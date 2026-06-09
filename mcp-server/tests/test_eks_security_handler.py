@@ -1300,7 +1300,7 @@ class TestPolicyEnforcementEngine:
         handler = EKSSecurityHandler(mock_mcp, mock_client_cache)
 
         def mock_call_api(path, method, **kwargs):
-            if 'constraints.gatekeeper.sh' in path:
+            if path == '/apis/constraints.gatekeeper.sh':
                 return MagicMock()
             raise Exception('Not found')
 
@@ -1319,7 +1319,7 @@ class TestPolicyEnforcementEngine:
         handler = EKSSecurityHandler(mock_mcp, mock_client_cache)
 
         def mock_call_api(path, method, **kwargs):
-            if 'kyverno.io' in path:
+            if path == '/apis/kyverno.io/v1':
                 return MagicMock()
             raise Exception('Not found')
 

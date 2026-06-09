@@ -990,13 +990,18 @@ class EKSSecurityHandler:
                 provisioner = sc.get('provisioner', '')
                 encrypted = False
                 
-                if 'ebs.csi.aws.com' in provisioner:
+                # provisioner is the StorageClass CSI driver name (an exact
+                # identifier such as "ebs.csi.aws.com"), not a URL or path —
+                # match it exactly. (Exact match also satisfies CodeQL's
+                # py/incomplete-url-substring-sanitization, which misreads
+                # these host-like driver names as URLs.)
+                if provisioner == 'ebs.csi.aws.com':
                     # EBS CSI driver - check for encrypted parameter
                     encrypted = parameters.get('encrypted', '').lower() == 'true'
-                elif 'efs.csi.aws.com' in provisioner:
+                elif provisioner == 'efs.csi.aws.com':
                     # EFS CSI driver - EFS is encrypted by default in newer versions
                     encrypted = True
-                elif 'fsx.csi.aws.com' in provisioner:
+                elif provisioner == 'fsx.csi.aws.com':
                     # FSx CSI driver - check for encryption parameters
                     encrypted = parameters.get('KmsKeyId') is not None or parameters.get('EncryptionAtTransitRequested') is not None
                 
