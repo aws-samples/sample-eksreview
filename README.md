@@ -136,8 +136,8 @@ cd eksreview
 # Configure AWS credentials if you haven't already
 aws configure
 
-# Point kubectl at the cluster you want to review
-aws eks update-kubeconfig --name my-cluster --region us-east-1
+# Set the region where your cluster lives (the checks require a region)
+export AWS_REGION=us-west-2
 
 # Launch the agent (auto-activates the virtual environment)
 ./eksreview
@@ -682,8 +682,8 @@ Include the region in your request ("review eks-prod in us-east-1") or set `AWS_
 **"AccessDeniedException" calling Bedrock InvokeModel**
 Enable model access in the Bedrock console (Model access) for your region, and confirm your IAM principal has `bedrock:InvokeModel`.
 
-**"Unable to load kubeconfig" / cluster not found**
-Update kubeconfig: `aws eks update-kubeconfig --name <cluster> --region <region>`. List clusters with `aws eks list-clusters --region <region>`.
+**"No cluster found" / cluster not found**
+Make sure `AWS_REGION` is set to the region where the cluster lives, and that your credentials point at the right account. Verify with `aws sts get-caller-identity` and list clusters with `aws eks list-clusters --region <region>`. eksreview connects to the Kubernetes API itself using short-lived STS tokens, so you do **not** need to run `aws eks update-kubeconfig` — but your IAM identity must be mapped into the cluster (see [Permissions](#permissions)).
 
 **Session feels expensive or slow**
 Type `/context` to see token usage and cost. Switch to a cheaper model mid-session with `/model sonnet`, or start a fresh session.
