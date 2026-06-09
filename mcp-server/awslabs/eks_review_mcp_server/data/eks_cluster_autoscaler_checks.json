@@ -1,0 +1,88 @@
+{
+    "cluster_autoscaler_checks": {
+        "C1": {
+            "name": "Cluster Autoscaler version matches cluster version",
+            "description": "The Cluster Autoscaler's version should match the Kubernetes cluster version for compatibility",
+            "category": "Version Compatibility",
+            "severity": "High"
+        },
+        "C2": {
+            "name": "Auto Discovery is enabled",
+            "description": "Auto Discovery should be enabled unless you have specific advanced use cases",
+            "category": "Auto Discovery",
+            "severity": "High"
+        },
+        "C3": {
+            "name": "Node groups have proper auto-discovery tags",
+            "description": "Node groups must have the required tags for auto-discovery to work",
+            "category": "Auto Discovery",
+            "severity": "High"
+        },
+        "C4": {
+            "name": "Least privileged IAM role with scoped permissions",
+            "description": "IAM role should follow least privilege principle with actions scoped to specific Auto Scaling Groups",
+            "category": "IAM Security",
+            "severity": "High"
+        },
+        "C5": {
+            "name": "Identical scheduling properties within node groups",
+            "description": "Each node in a node group should have identical scheduling properties (labels, taints, resources)",
+            "category": "Node Group Configuration",
+            "severity": "High"
+        },
+        "C6": {
+            "name": "Prefer fewer node groups with many nodes",
+            "description": "Node groups with many nodes are preferred over many node groups with fewer nodes for scalability",
+            "category": "Node Group Configuration",
+            "severity": "Medium"
+        },
+        "C7": {
+            "name": "Use EKS Managed Node Groups",
+            "description": "EKS Managed Node Groups provide automatic discovery and graceful termination features",
+            "category": "Node Group Configuration",
+            "severity": "Medium"
+        },
+        "C8": {
+            "name": "Use Spot Instances with proper diversification",
+            "description": "Spot instances can save up to 90% cost but require proper diversification strategy",
+            "category": "Cost Optimization",
+            "severity": "Medium"
+        },
+        "C9": {
+            "name": "Separate On-Demand and Spot capacity",
+            "description": "Isolate On-Demand and Spot instances into separate Auto Scaling Groups due to different scheduling properties",
+            "category": "Cost Optimization",
+            "severity": "Medium"
+        },
+        "C10": {
+            "name": "Configure appropriate expander strategy",
+            "description": "Expander strategy determines which node group to scale for cost optimization",
+            "category": "Cost Optimization",
+            "severity": "Low"
+        },
+        "C11": {
+            "name": "Appropriate resource allocation for Cluster Autoscaler",
+            "description": "Cluster Autoscaler needs sufficient CPU and memory resources for large clusters",
+            "category": "Performance & Scalability",
+            "severity": "Medium"
+        },
+        "C12": {
+            "name": "Optimize scan interval for cluster size",
+            "description": "Scan interval should be balanced between responsiveness and API rate limiting",
+            "category": "Performance & Scalability",
+            "severity": "Low"
+        },
+        "C13": {
+            "name": "Configure overprovisioning for reduced latency",
+            "description": "Overprovisioning trades cost for improved pod scheduling latency",
+            "category": "Availability",
+            "severity": "Low"
+        },
+        "C14": {
+            "name": "Protect expensive workloads from eviction",
+            "description": "Long-running or expensive workloads should be protected from scale-down eviction",
+            "category": "Availability",
+            "severity": "Medium"
+        }
+    }
+}

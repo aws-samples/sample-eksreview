@@ -1,0 +1,112 @@
+name: security
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  schedule:
+    # Weekly Sunday at 06:00 UTC — catches CVEs disclosed against pinned deps
+    # without anyone touching the repo.
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # security-events lets us upload SARIF if we ever wire that up
+  security-events: read
+
+jobs:
+  pip-audit:
+    name: pip-audit (CVE scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install pip-audit
+        run: pip install "pip-audit>=2.7,<3.0"
+
+      - name: Audit declared dependencies
+        # Reports CVEs in declared/transitive deps but does NOT fail the
+        # build — most findings will be in transitive deps you can't fix
+        # without upstream releases. Tighten to --strict once the baseline
+        # is clean, then use --ignore-vuln <ID> for accepted residuals.
+        run: pip-audit
+
+      - name: Audit lock file
+        # Same policy as above — reports without failing.
+        if: hashFiles('requirements-lock.txt') != ''
+        run: pip-audit -r requirements-lock.txt
+
+  bandit:
+    name: bandit (Python SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install bandit
+        run: pip install "bandit[toml]>=1.7"
+
+      - name: Run bandit on agent code
+        # -ll = report Medium and High severity only.
+        # -ii = report High confidence only.
+        # Covers both the agent package and the bundled MCP server.
+        run: |
+          bandit -r eks_review_agent main.py -ll -ii
+          bandit -r mcp-server/awslabs -ll -ii
+
+  ruff:
+    name: ruff (security lints)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install "ruff>=0.8.0,<1.0.0"
+
+      - name: Run ruff with security rules
+        # S = bandit-style security rules. Other rule families (E/W/F) are
+        # opted-in by the project's own ruff config; this job is focused
+        # on security findings.
+        run: ruff check --select S eks_review_agent main.py
+
+  pytest:
+    name: pytest + coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project + dev dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests with coverage gate
+        # Fail the build if coverage drops below the 60% target. The
+        # baseline at the time of CI introduction was ~67%; lower this
+        # only with a deliberate decision documented in the PR.
+        run: pytest --cov --cov-fail-under=60

@@ -1,0 +1,73 @@
+{
+  "networking_checks": {
+    "N1": {
+      "name": "EKS Cluster Endpoint Access Control",
+      "description": "Check if the cluster endpoint is properly configured with restricted public access",
+      "category": "networking",
+      "severity": "High",
+      "enabled": true
+    },
+    "N2": {
+      "name": "Multi-AZ Node Distribution",
+      "description": "Check if worker nodes are properly distributed across multiple availability zones for high availability",
+      "category": "networking",
+      "severity": "High",
+      "enabled": true
+    },
+    "N3": {
+      "name": "Private Subnet Node Deployment",
+      "description": "Check if worker nodes are deployed in private subnets for enhanced security",
+      "category": "networking",
+      "severity": "High",
+      "enabled": true
+    },
+    "N4": {
+      "name": "VPC CNI Managed Add-on Usage",
+      "description": "Check if the cluster uses AWS VPC CNI and whether it's deployed as an EKS managed add-on for better security and maintenance",
+      "category": "networking",
+      "severity": "Medium",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "N5": {
+      "name": "VPC CNI Service Account IAM Role",
+      "description": "Check if VPC CNI uses a dedicated service account with proper IAM role instead of using node instance profile",
+      "category": "networking",
+      "severity": "Medium",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "N6": {
+      "name": "Subnet IP Address Availability",
+      "description": "Check if subnets have sufficient available IP addresses and recommend solutions for IP exhaustion",
+      "category": "networking",
+      "severity": "High",
+      "enabled": true,
+      "skip_for_auto_mode": false
+    },
+    "N7": {
+      "name": "Load Balancer Target Type Configuration",
+      "description": "Check if Ingress and LoadBalancer services use IP target mode instead of instance mode for better IP efficiency",
+      "category": "networking",
+      "severity": "Medium",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "N8": {
+      "name": "PreStop Hook Configuration for Ingress Deployments",
+      "description": "Check if Deployments behind Ingress resources have PreStop hooks configured for graceful connection draining",
+      "category": "networking",
+      "severity": "Medium",
+      "enabled": true,
+      "skip_for_auto_mode": false
+    },
+    "N9": {
+      "name": "Kube-Proxy Mode for Service Scale",
+      "description": "Check if kube-proxy mode is appropriate for the number of services in the cluster (IPVS recommended for >1000 services)",
+      "category": "networking",
+      "severity": "High",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    }
+  }
+}

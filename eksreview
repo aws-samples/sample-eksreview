@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# eksreview launcher — activates the project venv and runs the agent.
+#
+# Usage:
+#   ./eksreview                         # start an interactive session
+#   ./eksreview --session <session-id>  # resume a previous session
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+if [ ! -d ".venv" ]; then
+    echo "  error: virtual environment not found."
+    echo "  Run ./install.sh first to set up the project."
+    exit 1
+fi
+
+# shellcheck disable=SC1091
+source .venv/bin/activate
+
+exec python main.py "$@"

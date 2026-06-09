@@ -1,0 +1,78 @@
+[project]
+name = "eksreview"
+version = "0.1.0"
+description = "Conversational AI agent for EKS operations review using Strands SDK"
+requires-python = ">=3.10"
+license = "MIT-0"
+# Dependencies are pinned with both lower bounds (features used) and upper
+# bounds (next major) to limit supply-chain risk from breaking releases.
+# For reproducible installs, a lock file is generated via
+# `pip freeze > requirements-lock.txt`.
+dependencies = [
+    "strands-agents>=1.32.0,<2.0.0",
+    "strands-agents-tools>=0.2.23,<1.0.0",
+    "boto3>=1.42.0,<2.0.0",
+    "mcp>=1.26.0,<2.0.0",
+    "pdfminer.six>=20221105",
+    "requests>=2.32.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-cov>=4.1,<6.0",
+    "ruff>=0.8.0,<1.0.0",
+    "pip-audit>=2.7,<3.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# Explicit package discovery — prevents setuptools from accidentally
+# treating skills/, reports/, mcp-server/, etc. as Python packages.
+[tool.setuptools.packages.find]
+include = ["eks_review_agent*"]
+exclude = ["skills*", "reports*", "mcp-server*", "tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "-q",
+]
+markers = [
+    "slow: marks tests as slow (deselect with -m 'not slow')",
+    "integration: tests that exercise multi-module flows",
+]
+
+[tool.coverage.run]
+source = ["eks_review_agent"]
+branch = true
+# Skip files we don't need to gate on:
+#   - main.py: REPL/CLI integration; covered by manual + integration tests.
+#   - ui/picker.py: terminal-driven UI, hard to unit-test meaningfully.
+#   - core/callbacks.py: print-side-effect heavy, smoke-tested separately.
+omit = [
+    "eks_review_agent/ui/picker.py",
+    "eks_review_agent/core/callbacks.py",
+    "eks_review_agent/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    # Defensive branches we don't test
+    "except ImportError",
+]
+show_missing = true
+skip_covered = false
+precision = 1

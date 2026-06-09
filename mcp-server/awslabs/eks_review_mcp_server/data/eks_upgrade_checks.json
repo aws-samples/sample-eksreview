@@ -1,0 +1,288 @@
+{
+  "control_plane_checks": {
+    "U1": {
+      "name": "Cluster Version and Support Status",
+      "description": "Check current cluster version, support status, and whether extended support pricing applies",
+      "category": "control_plane",
+      "severity": "High",
+      "enabled": true
+    },
+    "U2": {
+      "name": "Target Version Availability",
+      "description": "Validate the target Kubernetes version is available and is the next sequential minor version",
+      "category": "control_plane",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U3": {
+      "name": "Multi-Version Hop Detection",
+      "description": "Detect if the upgrade requires multiple sequential version hops (EKS only supports one minor version at a time)",
+      "category": "control_plane",
+      "severity": "High",
+      "enabled": true
+    }
+  },
+  "upgrade_insights_checks": {
+    "U4": {
+      "name": "EKS Upgrade Insights",
+      "description": "Retrieve and analyze AWS EKS upgrade readiness insights including deprecated API usage, addon compatibility, and cluster health",
+      "category": "upgrade_insights",
+      "severity": "Critical",
+      "enabled": true
+    }
+  },
+  "addon_compatibility_checks": {
+    "U5": {
+      "name": "EKS Managed Addon Compatibility",
+      "description": "Check installed EKS managed addon versions against target Kubernetes version compatibility",
+      "category": "addon_compatibility",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U6": {
+      "name": "Self-Managed Addon Detection",
+      "description": "Detect core addons (CoreDNS, kube-proxy, VPC CNI) installed outside the EKS addon system that won't be checked by Upgrade Insights",
+      "category": "addon_compatibility",
+      "severity": "High",
+      "enabled": true
+    },
+    "U7": {
+      "name": "Addon Health Issues",
+      "description": "Check for any health issues reported by installed EKS addons that could impact upgrade",
+      "category": "addon_compatibility",
+      "severity": "Critical",
+      "enabled": true
+    }
+  },
+  "data_plane_checks": {
+    "U8": {
+      "name": "Node Kubelet Version Skew",
+      "description": "Check kubelet versions across all nodes to ensure compliance with Kubernetes version skew policy after upgrade",
+      "category": "data_plane",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U9": {
+      "name": "Node Group AMI Type",
+      "description": "Check managed node group AMI types for AL2 deprecation (deprecated in 1.32, removed in 1.33+)",
+      "category": "data_plane",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U10": {
+      "name": "Node Group Pending Updates",
+      "description": "Check for pending launch template updates on managed node groups that could compound with the upgrade",
+      "category": "data_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U11": {
+      "name": "Subnet IP Availability",
+      "description": "Check if cluster subnets have sufficient available IPs for control plane ENIs during upgrade (minimum 5 per subnet required)",
+      "category": "data_plane",
+      "severity": "Critical",
+      "enabled": true
+    }
+  },
+  "workload_readiness_checks": {
+    "U12": {
+      "name": "PodDisruptionBudget Coverage",
+      "description": "Check if production workloads have PodDisruptionBudgets to protect availability during node rolling updates",
+      "category": "workload_readiness",
+      "severity": "High",
+      "enabled": true
+    },
+    "U13": {
+      "name": "Single-Replica Workloads",
+      "description": "Identify Deployments and StatefulSets with only 1 replica that will have guaranteed downtime during node replacement",
+      "category": "workload_readiness",
+      "severity": "High",
+      "enabled": true
+    },
+    "U14": {
+      "name": "Missing Readiness Probes",
+      "description": "Check for containers without readiness probes that could receive traffic before being ready after node replacement",
+      "category": "workload_readiness",
+      "severity": "High",
+      "enabled": true
+    },
+    "U15": {
+      "name": "Pod Topology and Anti-Affinity",
+      "description": "Check for workloads missing topology spread constraints or pod anti-affinity that risk all replicas on the same node",
+      "category": "workload_readiness",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U16": {
+      "name": "MinReadySeconds Configuration",
+      "description": "Check if StatefulSets have minReadySeconds > 0 to prevent premature readiness during rolling updates",
+      "category": "workload_readiness",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U17": {
+      "name": "TerminationGracePeriodSeconds Zero",
+      "description": "Check for StatefulSets with terminationGracePeriodSeconds set to 0 which is unsafe during upgrades",
+      "category": "workload_readiness",
+      "severity": "High",
+      "enabled": true
+    }
+  },
+  "third_party_checks": {
+    "U18": {
+      "name": "Cluster Autoscaler Version Compatibility",
+      "description": "Check if Cluster Autoscaler version matches the target Kubernetes version",
+      "category": "third_party",
+      "severity": "High",
+      "enabled": true
+    },
+    "U19": {
+      "name": "Karpenter Version Compatibility",
+      "description": "Check Karpenter deployment version for compatibility with target Kubernetes version",
+      "category": "third_party",
+      "severity": "High",
+      "enabled": true
+    },
+    "U20": {
+      "name": "Third-Party Controller Inventory",
+      "description": "Scan for known third-party controllers (cert-manager, Istio, ArgoCD, external-secrets, etc.) and report their versions for manual compatibility review",
+      "category": "third_party",
+      "severity": "Medium",
+      "enabled": true
+    }
+  },
+  "cluster_health_checks": {
+    "U21": {
+      "name": "Control Plane Logging",
+      "description": "Check if control plane audit logging is enabled (required for Upgrade Insights to detect deprecated API usage)",
+      "category": "cluster_health",
+      "severity": "High",
+      "enabled": true
+    },
+    "U22": {
+      "name": "Cluster Health Issues",
+      "description": "Check for any health issues reported by the EKS control plane that could block upgrade",
+      "category": "cluster_health",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U23": {
+      "name": "kube-proxy Version Skew",
+      "description": "Check kube-proxy version to ensure it won't exceed the 3 minor version skew limit after upgrade",
+      "category": "cluster_health",
+      "severity": "Critical",
+      "enabled": true
+    }
+  },
+  "api_deprecation_checks": {
+    "U24": {
+      "name": "Deprecated APIs in Live Resources",
+      "description": "Scan CRDs, webhooks, FlowSchemas, and other resources for deprecated API versions that will be removed in the target version",
+      "category": "api_deprecation",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U25": {
+      "name": "Deprecated APIs in Helm Releases",
+      "description": "Decode Helm release secrets and scan stored manifests for deprecated API versions not visible through the live API",
+      "category": "api_deprecation",
+      "severity": "Critical",
+      "enabled": true
+    },
+    "U26": {
+      "name": "Deprecated APIs Warning (Future Versions)",
+      "description": "Identify resources using API versions that are deprecated but not yet removed in the target version (proactive warning)",
+      "category": "api_deprecation",
+      "severity": "Medium",
+      "enabled": true
+    }
+  },
+  "infrastructure_checks": {
+    "U27": {
+      "name": "Node Subnet IP Availability",
+      "description": "Check if node subnets have sufficient IPs for node rolling replacement during upgrade",
+      "category": "infrastructure",
+      "severity": "High",
+      "enabled": true
+    },
+    "U28": {
+      "name": "Pod Subnet IP Availability (Custom Networking)",
+      "description": "Check pod subnet IPs when VPC CNI custom networking is enabled (pods use different subnets than nodes)",
+      "category": "infrastructure",
+      "severity": "High",
+      "enabled": true
+    },
+    "U29": {
+      "name": "EC2 Instance Service Limits",
+      "description": "Check if EC2 service quotas allow launching additional instances during node group rolling updates",
+      "category": "infrastructure",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U30": {
+      "name": "EBS GP2 Volume Service Limits",
+      "description": "Check EBS GP2 volume service quotas for PV re-attachment during node replacement",
+      "category": "infrastructure",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U31": {
+      "name": "EBS GP3 Volume Service Limits",
+      "description": "Check EBS GP3 volume service quotas for PV re-attachment during node replacement",
+      "category": "infrastructure",
+      "severity": "Medium",
+      "enabled": true
+    }
+  },
+  "kubernetes_compat_checks": {
+    "U32": {
+      "name": "Self-Managed Node Group Launch Template Updates",
+      "description": "Check for self-managed node groups with pending launch template updates",
+      "category": "kubernetes_compat",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U33": {
+      "name": "kube-proxy IPVS Mode Deprecation",
+      "description": "Check if kube-proxy uses IPVS mode which is deprecated in K8s 1.35+ and removed in 1.36",
+      "category": "kubernetes_compat",
+      "severity": "High",
+      "enabled": true
+    },
+    "U34": {
+      "name": "Ingress NGINX Controller Retirement",
+      "description": "Check for the retired Kubernetes community Ingress NGINX controller that should be migrated",
+      "category": "kubernetes_compat",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U35": {
+      "name": "Docker Socket Mounts",
+      "description": "Check for pods mounting docker.sock or dockershim.sock which do not exist on containerd-based EKS nodes (containerd is the only runtime since K8s 1.24)",
+      "category": "kubernetes_compat",
+      "severity": "High",
+      "enabled": true
+    },
+    "U36": {
+      "name": "Workloads Scaled to Zero",
+      "description": "Check for workloads scaled to zero replicas that may be forgotten during upgrade validation",
+      "category": "kubernetes_compat",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U37": {
+      "name": "EKS Configuration Insights",
+      "description": "Retrieve EKS MISCONFIGURATION insights that may affect cluster health during upgrade",
+      "category": "kubernetes_compat",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "U38": {
+      "name": "Third-Party API Deprecations",
+      "description": "Check for deprecated API versions specific to third-party components (Istio, cert-manager) from the deprecation database",
+      "category": "kubernetes_compat",
+      "severity": "High",
+      "enabled": true
+    }
+  }
+}

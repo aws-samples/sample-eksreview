@@ -1,0 +1,215 @@
+{
+  "application_checks": {
+    "A1": {
+      "name": "Avoid running singleton Pods",
+      "description": "Check for pods without controller management",
+      "category": "application",
+      "severity": "High",
+      "enabled": true
+    },
+    "A2": {
+      "name": "Run multiple replicas",
+      "description": "Check for deployments with only one replica",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A3": {
+      "name": "Use pod anti-affinity",
+      "description": "Multi-replica deployments without pod anti-affinity",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A4": {
+      "name": "Use liveness probes",
+      "description": "Deployments without liveness probes",
+      "category": "application",
+      "severity": "High",
+      "enabled": true
+    },
+    "A5": {
+      "name": "Use readiness probes",
+      "description": "Deployments without readiness probes",
+      "category": "application",
+      "severity": "High",
+      "enabled": true
+    },
+    "A6": {
+      "name": "Use Pod Disruption Budgets",
+      "description": "Critical workloads without Pod Disruption Budgets",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A7": {
+      "name": "Run Kubernetes Metrics Server",
+      "description": "Kubernetes Metrics Server availability",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A8": {
+      "name": "Use Horizontal Pod Autoscaler",
+      "description": "Multi-replica workloads without HPA",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A9": {
+      "name": "Use custom metrics scaling",
+      "description": "Custom metrics scaling capability",
+      "category": "application",
+      "severity": "Low",
+      "enabled": true
+    },
+    "A10": {
+      "name": "Use Vertical Pod Autoscaler",
+      "description": "Vertical Pod Autoscaler availability",
+      "category": "application",
+      "severity": "Low",
+      "enabled": true
+    },
+    "A11": {
+      "name": "Use preStop hooks",
+      "description": "PreStop hooks for graceful termination",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A12": {
+      "name": "Use a Service Mesh",
+      "description": "Service mesh implementation",
+      "category": "application",
+      "severity": "Low",
+      "enabled": true
+    },
+    "A13": {
+      "name": "Monitor your applications",
+      "description": "Application monitoring solution",
+      "category": "application",
+      "severity": "High",
+      "enabled": true
+    },
+    "A14": {
+      "name": "Use centralized logging",
+      "description": "Centralized logging solution",
+      "category": "application",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "A15": {
+      "name": "Use startup probes",
+      "description": "Workloads with liveness probes but no startup probes risk being killed before the application is ready. Startup probes prevent liveness probes from running until the application has fully started, which is critical for slow-starting applications.",
+      "category": "application",
+      "severity": "High",
+      "enabled": true
+    }
+  },
+  "control_plane_checks": {
+    "C1": {
+      "name": "Monitor Control Plane Logs",
+      "description": "Check if control plane logging is enabled",
+      "category": "control_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "C2": {
+      "name": "Cluster Authentication",
+      "description": "Check cluster authentication configuration",
+      "category": "control_plane",
+      "severity": "High",
+      "enabled": true
+    },
+    "C3": {
+      "name": "Running large clusters",
+      "description": "Large cluster optimization checks",
+      "category": "control_plane",
+      "severity": "Medium",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "C4": {
+      "name": "EKS Control Plane Endpoint Access Control",
+      "description": "API server endpoint access control",
+      "category": "control_plane",
+      "severity": "High",
+      "enabled": true
+    },
+    "C5": {
+      "name": "Avoid catch-all admission webhooks",
+      "description": "Check for overly broad admission webhooks",
+      "category": "control_plane",
+      "severity": "Medium",
+      "enabled": true
+    }
+  },
+  "data_plane_checks": {
+    "D1": {
+      "name": "Use Kubernetes Cluster Autoscaler or Karpenter",
+      "description": "Check for node autoscaling configuration",
+      "category": "data_plane",
+      "severity": "High",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "D2": {
+      "name": "Worker nodes spread across multiple AZs",
+      "description": "Check if nodes are distributed across availability zones",
+      "category": "data_plane",
+      "severity": "High",
+      "enabled": true
+    },
+    "D3": {
+      "name": "Configure Resource Requests/Limits",
+      "description": "Check for proper resource constraints",
+      "category": "data_plane",
+      "severity": "High",
+      "enabled": true
+    },
+    "D4": {
+      "name": "Namespace ResourceQuotas",
+      "description": "Check for namespace resource governance",
+      "category": "data_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "D5": {
+      "name": "Namespace LimitRanges",
+      "description": "Check for namespace default resource limits",
+      "category": "data_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "D6": {
+      "name": "Monitor CoreDNS metrics",
+      "description": "Check for DNS service monitoring",
+      "category": "data_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "D7": {
+      "name": "CoreDNS Configuration",
+      "description": "Check if CoreDNS is properly managed",
+      "category": "data_plane",
+      "severity": "Low",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    },
+    "D8": {
+      "name": "EKS Node Monitoring Agent",
+      "description": "Check if the EKS Node Monitoring Agent add-on is installed. This agent provides enhanced node-level health monitoring and diagnostics for EKS worker nodes.",
+      "category": "data_plane",
+      "severity": "Medium",
+      "enabled": true
+    },
+    "D9": {
+      "name": "Kubelet Reserved Resources",
+      "description": "Check if kubelet has reserved resources for system processes. Without reservations, system daemons and kubelet compete with pods for resources, risking node instability under pressure. Inferred by comparing node capacity vs allocatable.",
+      "category": "data_plane",
+      "severity": "High",
+      "enabled": true,
+      "skip_for_auto_mode": true
+    }
+  }
+}

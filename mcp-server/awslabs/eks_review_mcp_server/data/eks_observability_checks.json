@@ -1,0 +1,64 @@
+{
+    "observability_checks": {
+        "OB1": {
+            "name": "API Server Request Error Rate (5xx)",
+            "description": "Check if the EKS API server has experienced 5xx server errors in the last 7 days. Sustained 5xx errors indicate control plane issues such as etcd timeouts, webhook failures, or resource exhaustion.",
+            "category": "control_plane",
+            "severity": "High",
+            "enabled": true,
+            "metric_name": "apiserver_request_total_5XX",
+            "namespace": "AWS/EKS",
+            "statistic": "Sum",
+            "threshold": 100,
+            "threshold_description": "More than 100 total 5xx errors in 7 days (~14/day average)"
+        },
+        "OB2": {
+            "name": "API Server Throttling (429 Rate Limiting)",
+            "description": "Check if the EKS API server has been throttling client requests with 429 status codes. Throttling indicates clients are exceeding API Priority and Fairness rate limits, which can cause controller delays and degraded cluster operations. This covers the intent of monitoring apiserver_flowcontrol_rejected_requests_total since 429 responses are the visible result of APF rejections.",
+            "category": "control_plane",
+            "severity": "High",
+            "enabled": true,
+            "metric_name": "apiserver_request_total_429",
+            "namespace": "AWS/EKS",
+            "statistic": "Sum",
+            "threshold": 50,
+            "threshold_description": "More than 50 total 429 throttled requests in 7 days"
+        },
+        "OB3": {
+            "name": "etcd Storage Size",
+            "description": "Check if the etcd storage database size is approaching the 8GB limit. Amazon EKS provisions the maximum recommended database size of 8GB. When exceeded, etcd rejects all write operations (NOSPACE alarm), effectively making the cluster read-only. Per AWS documentation, monitor this metric to take corrective action before reaching the limit. This is the default vended equivalent of etcd_db_total_size_in_bytes.",
+            "category": "control_plane",
+            "severity": "Critical",
+            "enabled": true,
+            "metric_name": "apiserver_storage_size_bytes",
+            "namespace": "AWS/EKS",
+            "statistic": "Maximum",
+            "threshold": 6442450944,
+            "threshold_description": "etcd storage size exceeded 6GB (75% of 8GB hard limit)"
+        },
+        "OB4": {
+            "name": "Admission Webhook Latency",
+            "description": "Check if third-party admission webhook P99 latency is elevated. Admission webhooks execute synchronously in the API request path and directly add to API server latency. Per AWS best practices, webhook latency is a common source of control plane slowness. The Kubernetes mutating request SLO is 1 second total including webhook time.",
+            "category": "control_plane",
+            "severity": "High",
+            "enabled": true,
+            "metric_name": "apiserver_admission_webhook_admission_duration_seconds",
+            "namespace": "AWS/EKS",
+            "statistic": "Average",
+            "threshold": 3.0,
+            "threshold_description": "Webhook P99 latency exceeded 3 seconds (webhooks execute in the API request path)"
+        },
+        "OB5": {
+            "name": "Scheduler Pending Pods",
+            "description": "Check if there are consistently pending pods that cannot be scheduled. Pending pods indicate insufficient cluster capacity, resource constraints, or scheduling conflicts (taints, affinity rules, PVC availability). Per AWS best practices, monitor scheduler backlog to detect capacity issues early.",
+            "category": "control_plane",
+            "severity": "High",
+            "enabled": true,
+            "metric_name": "scheduler_pending_pods",
+            "namespace": "AWS/EKS",
+            "statistic": "Maximum",
+            "threshold": 10,
+            "threshold_description": "More than 10 pending pods observed at peak in 7 days"
+        }
+    }
+}

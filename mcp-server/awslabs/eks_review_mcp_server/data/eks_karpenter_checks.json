@@ -1,0 +1,66 @@
+{
+    "karpenter": {
+        "K1": {
+            "name": "Check if Self-Managed Karpenter is deployed",
+            "description": "Karpenter is an open-source project designed to enhance node lifecycle management within Kubernetes clusters. It automates provisioning and deprovisioning of nodes based on the specific scheduling needs of pods, allowing efficient scaling and cost optimization.",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K2": {
+            "name": "Lock down AMIs in production clusters",
+            "description": "Its strongly recommended that you pin well-known Amazon Machine Images (AMIs) used by Karpenter for production clusters",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K3": {
+            "name": "Exclude instance types that do not fit your workload",
+            "description": "Explicitly exclude the instance types that do not fit your workload",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K4": {
+            "name": "Create NodePools that are mutually exclusive or weighted",
+            "description": "It is recommended to create NodePools that are either mutually exclusive or weighted to provide consistent scheduling behavior.",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K5": {
+            "name": "Use timers (TTL) to automatically delete nodes from the cluster",
+            "description": "You can use timers on provisioned nodes to set when to delete nodes that are devoid of workload pods or have reached an expiration time. Node expiry can be used as a means of upgrading, so that nodes are retired and replaced with updated versions.",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K6": {
+            "name": "Avoid overly constraining the Instance Types that Karpenter can provision, especially when utilizing Spot",
+            "description": "When using Spot, Karpenter uses the Price Capacity Optimized allocation strategy to provision EC2 instances. This strategy instructs EC2 to provision instances from the deepest pools for the number of instances that you are launching and have the lowest risk of interruption.",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K7": {
+            "name": "Configure the Limits in the karpenter node pools",
+            "description": "Limits constrains the maximum amount of resources that the NodePool can consume",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K8": {
+            "name": "Configure the proper disruption settings for a production cluster",
+            "description": "Disruption section which describes the ways in which Karpenter can disrupt and replace Nodes",
+            "category": "karpenter",
+            "severity": "High"
+        },
+        "K9": {
+            "name": "Check if Spot capacity is used in the nodepool and ensure spot to spot consolidation is enabled in the karpenter feature gates",
+            "description": "Karpenter uses environment variables and CLI parameters to allow you to configure certain global settings on the controllers",
+            "category": "karpenter",
+            "severity": "High"
+        }
+    },
+    "auto_mode": {
+        "A1": {
+            "name": "Check if EKS Auto mode is enabled, if Auto mode is enabled do not run any Karpenter related checks",
+            "description": "Amazon EKS Auto Mode represents a significant evolution in Kubernetes infrastructure management, combining secure and scalable cluster infrastructure with integrated Kubernetes capabilities managed by AWS. The service provides fully-managed worker node operations, eliminating the need for customers to set up Managed Node Groups or AutoScaling groups",
+            "category": "auto mode",
+            "severity": "High"
+        }
+    }
+}

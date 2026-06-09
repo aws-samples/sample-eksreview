@@ -1,0 +1,175 @@
+{
+    "iam_checks": {
+        "I1": {
+            "name": "Leverage EKS Cluster Access Manager to configure RBAC",
+            "description": "Cluster Access Manager, now the preferred way to manage access of AWS IAM principals to Amazon EKS clusters",
+            "category": "IAM",
+            "severity": "Medium"
+        },
+        "I2": {
+            "name": "Make the EKS Cluster Endpoint private",
+            "description": "By default when you provision an EKS cluster, the API cluster endpoint is set to public, i.e. it can be accessed from the Internet",
+            "category": "IAM",
+            "severity": "High"
+        },
+        "I3": {
+            "name": "Don't use a service account token for authentication",
+            "description": "A service account token is a long-lived, static credential. If it is compromised, lost, or stolen, an attacker may be able to perform all the actions associated with that token until the service account is deleted.",
+            "category": "IAM",
+            "severity": "High"
+        },
+        "I4": {
+            "name": "Employ least privileged access when creating RoleBindings and ClusterRoleBindings",
+            "description": "When creating RoleBindings and ClusterRoleBindings, ensure that the Role or ClusterRole has the least privileged set of permissions.",
+            "category": "IAM",
+            "severity": "Medium"
+        },
+        "I5": {
+            "name": "Leverage EKS Pod Identity",
+            "description": "EKS Pod Identity allows you to assign an IAM role to a kubernetes service account, without the need to configure an Open Id Connect (OIDC) identity provider(IDP) for each cluster in your AWS account",
+            "category": "IAM",
+            "severity": "Medium"
+        },
+        "I6": {
+            "name": "Ensure IMDSv2 is enforced in the worker node security configuration",
+            "description": "IMDSv2 is the recommended Instance Metadata Service Version. IMDSv1 is deprecated and IMDSv2 is the recommended version.",
+            "category": "IAM",
+            "severity": "High",
+            "skip_for_auto_mode": true
+        },
+        "I7": {
+            "name": "Run the application as a non-root user",
+            "description": "Containers run as root by default. While this allows them to read the web identity token file, running a container as root is not considered a best practice",
+            "category": "IAM",
+            "severity": "High"
+        },
+        "I8": {
+            "name": "Check if IRSA is configured",
+            "description": "IRSA is a feature that allows you to assign an IAM role to a Kubernetes service account. It works by leveraging a Kubernetes feature known as Service Account Token Volume Projection",
+            "category": "IAM",
+            "severity": "High",
+            "skip_for_auto_mode": true
+        },
+        "I9": {
+            "name": "Don't bind ClusterRoles to anonymous or unauthenticated groups",
+            "description": "Binding ClusterRoles to the system:anonymous user or system:unauthenticated group grants access to unauthenticated users, which is a significant security risk. Ensure no ClusterRoleBindings reference these subjects.",
+            "category": "IAM",
+            "severity": "High"
+        }
+    },
+    "pod_security": {
+        "P1": {
+            "name": "Check if Pod Security Standards (PSS) and Pod Security Admission (PSA) is configured",
+            "description": "The PSA includes an admission controller webhook that implements the controls defined in the PSS.",
+            "category": "Pod Security",
+            "severity": "High"
+        },
+        "P2": {
+            "name": "Restrict the use of hostPath or if hostPath is necessary restrict which prefixes can be used and configure the volume as read-only",
+            "description": "hostPath is a volume that mounts a directory from the host directly to the container",
+            "category": "Pod Security",
+            "severity": "High"
+        },
+        "P3": {
+            "name": "Check if the application is using the latest version of the image",
+            "description": "The image tag should be immutable to avoid unexpected upgrades",
+            "category": "Pod Security",
+            "severity": "Medium"
+        },
+        "P4": {
+            "name": "Do not allow privileged escalation",
+            "description": "Privileged escalation allows a process to change the security context under which its running.",
+            "category": "Pod Security",
+            "severity": "High"
+        },
+        "P5": {
+            "name": "Configure your images with read-only root file system",
+            "description": "Configuring your images with a read-only root file system prevents an attacker from overwriting a binary on the file system that your application uses",
+            "category": "Pod Security",
+            "severity": "Medium"
+        },
+        "P6": {
+            "name": "Disable ServiceAccount token mounts",
+            "description": "For pods that do not need to access the Kubernetes API, you can disable the automatic mounting of a ServiceAccount token",
+            "category": "Pod Security",
+            "severity": "Low"
+        }
+    },
+    "multi_tenancy": {
+        "M1": {
+            "name": "Check if Network Policies are used restric communication between namespaces",
+            "description": "By default, all pods in a Kubernetes cluster are allowed to communicate with each other. This behavior can be altered using network policies.",
+            "category": "Multi-Tenancy",
+            "severity": "Medium"
+        },
+        "M2": {
+            "name": "Check if Quotas are defined at the namespace level",
+            "description": "Quotas are used to define limits on workloads hosted in your cluster. With quotas, you can specify the maximum amount of CPU and memory that a pod can consume, or you can limit the number of resources that can be allocated in a cluster or namespace.",
+            "category": "Multi-Tenancy",
+            "severity": "Low"
+        },
+        "M3": {
+            "name": "Isolating tenant workloads to specific nodes",
+            "description": "Restricting tenant workloads to run on specific nodes can be used to increase isolation in the soft multi-tenancy model. With this approach, tenant-specific workloads are only run on nodes provisioned for the respective tenants",
+            "category": "Multi-Tenancy",
+            "severity": "Medium"
+        }
+    },
+    "detective_controls": {
+        "D1": {
+            "name": "Check if the EKS Control Plane logs are enabled",
+            "description": "Collecting and analyzing logs is useful for a variety of different reasons. Logs can help with root cause analysis and attribution",
+            "category": "Detective Controls",
+            "severity": "High"
+        }
+    },
+    "network_security": {},
+    "data_encryption_and_secrets_mgmt": {
+        "DE1": {
+            "name": "Check if Encryption is enbled in the StorgeClass",
+            "description": "Encrypting data at rest is considered a best practice. If you're unsure whether encryption is necessary, encrypt your data.",
+            "category": "Data Encryption and Secrets Mgmt",
+            "severity": "High"
+        },
+        "DE2": {
+            "name": "Use an external secrets provider",
+            "description": "External Secrets provider offer features such as fine grained access controls, strong encryption, and automatic rotation of secrets that are not available with Kubernetes Secrets",
+            "category": "Data Encryption and Secrets Mgmt",
+            "severity": "High"
+        },
+        "DE3": {
+            "name": "Enable envelope encryption for Kubernetes Secrets",
+            "description": "EKS supports envelope encryption of Kubernetes Secrets using AWS KMS. When enabled, secrets are encrypted at rest in etcd using a customer-managed KMS key, providing an additional layer of security beyond the default EBS volume encryption.",
+            "category": "Data Encryption and Secrets Mgmt",
+            "severity": "High"
+        }
+    },
+    "runtime_security": {
+        "RS1": {
+            "name": "Check if a policy enforcement engine is deployed",
+            "description": "Policy enforcement engines like Kyverno, Gatekeeper (OPA), or AWS Pod Identity Webhook provide admission control to enforce security policies. They can prevent non-compliant workloads from being deployed.",
+            "category": "Runtime Security",
+            "severity": "Medium"
+        }
+    },
+    "infra_security": {
+        "IS1": {
+            "name": "Check if the workers nodes are deployed onto private subnets",
+            "description": "By deploying workers onto private subnets, you minimize their exposure to the Internet where attacks often originate.",
+            "category": "Infra Security",
+            "severity": "High"
+        },
+        "IS2": {
+            "name": "Use an OS optimized for running containers",
+            "description": "Using a Container optimized ensures the performance and also reduces the attack surface",
+            "category": "Infra Security",
+            "severity": "High"
+        },
+        "IS3": {
+            "name": "Minimize access to worker nodes",
+            "description": "Instead of enabling SSH access for the worker nodes, use SSM Session Manager when you need to remote into a host.",
+            "category": "Infra Security",
+            "severity": "Medium"
+        }
+    }
+}
