@@ -179,10 +179,27 @@ def _error_hint(error_text: str, cluster_name: str, region: str | None) -> str:
         )
     return (
         "Verify cluster connectivity: confirm the cluster name and region are "
-        "correct, AWS credentials are valid, and kubectl access is configured "
-        f"(aws eks update-kubeconfig --name {cluster_name}"
-        f"{f' --region {region}' if region else ''})."
+        "correct, AWS credentials are valid, and your IAM identity is mapped "
+        "into the cluster (via an EKS access entry or the aws-auth ConfigMap). "
+        f"List clusters with: aws eks list-clusters"
+        f"{f' --region {region}' if region else ' --region <region>'}."
     )
+
+
+# A cluster-not-found error means the cluster does not exist in the target
+# account/region — an account-level fact, not a per-check condition. If any
+# domain reports it, no check result is trustworthy (even one that happens
+# to return success), so the whole review should abort.
+_CLUSTER_NOT_FOUND_MARKERS = (
+    "resourcenotfound",
+    "no cluster found",
+)
+
+
+def _is_cluster_not_found(error_text: str) -> bool:
+    """True if an error indicates the cluster doesn't exist in the region."""
+    lower = error_text.lower()
+    return any(marker in lower for marker in _CLUSTER_NOT_FOUND_MARKERS)
 
 
 # ── Public API ─────────────────────────────────────────────────────
@@ -233,19 +250,33 @@ def run_review(
     )
     raw_results = check_data["text"]
 
-    # Abort early if every domain check errored out. This avoids handing
-    # the report sub-agent a payload of error blobs (which it would then
-    # either flag as UNKNOWN or, worse, mislabel as PASS). Surface the
-    # real cause to the user instead of compiling a meaningless report.
-    if check_data["total"] > 0 and check_data["ok_count"] == 0:
-        sample_error = next(iter(check_data["errors"].values()), "unknown error")
+    # Abort early if the review can't produce a meaningful report. Two cases:
+    #   1. Every domain check errored out — nothing to report on.
+    #   2. Any check reports the cluster doesn't exist in the target
+    #      account/region. That's an account-level fact, so even a check
+    #      that happened to return success isn't trustworthy.
+    # In both cases, surface the real cause instead of handing the report
+    # sub-agent a payload of error blobs (which it would flag as UNKNOWN or,
+    # worse, mislabel as PASS).
+    all_failed = check_data["total"] > 0 and check_data["ok_count"] == 0
+    cluster_not_found = any(
+        _is_cluster_not_found(err) for err in check_data["errors"].values()
+    )
+    if all_failed or cluster_not_found:
+        sample_error = next(
+            (e for e in check_data["errors"].values() if _is_cluster_not_found(e)),
+            next(iter(check_data["errors"].values()), "unknown error"),
+        )
         logger.error(
-            "All %d checks failed for %s. Sample error: %s",
-            check_data["total"], cluster_name, sample_error,
+            "Review aborted for %s (all_failed=%s, cluster_not_found=%s). "
+            "Sample error: %s",
+            cluster_name, all_failed, cluster_not_found, sample_error,
         )
         hint = _error_hint(sample_error, cluster_name, region)
+        failed_n = check_data["error_count"]
+        total_n = check_data["total"]
         return (
-            f"The review could not run — all {check_data['total']} domain checks "
+            f"The review could not run — {failed_n} of {total_n} domain checks "
             f"failed for cluster '{cluster_name}'. No report was generated.\n\n"
             f"Cause: {sample_error}\n\n"
             f"{hint}\n\n"

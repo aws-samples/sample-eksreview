@@ -115,6 +115,35 @@ class TestEKSNetworkingHandlerInit:
         assert result.isError is True
         assert result.overall_compliant is False
 
+    @pytest.mark.asyncio
+    async def test_check_eks_networking_cluster_not_found(
+        self, mock_mcp, mock_client_cache, mock_context
+    ):
+        """Networking check fails fast when the cluster cannot be described.
+
+        Client init can succeed (creating boto3 clients makes no AWS call),
+        but if describe_cluster fails (cluster missing / no access),
+        _get_cluster_info returns None. The handler must return an error
+        response rather than running checks against empty data and
+        reporting a misleading pass.
+        """
+        handler = EKSNetworkingHandler(mock_mcp, mock_client_cache)
+
+        # Init succeeds (boto3 clients created), but cluster lookup fails.
+        handler._initialize_clients = AsyncMock(
+            return_value={'eks': MagicMock(), 'ec2': MagicMock(), 'k8s': None}
+        )
+        handler._get_cluster_info = AsyncMock(return_value=None)
+
+        result = await handler.check_eks_networking(
+            mock_context, cluster_name='missing-cluster', region='us-west-2'
+        )
+
+        assert isinstance(result, NetworkingCheckResponse)
+        assert result.isError is True
+        assert result.overall_compliant is False
+        assert 'missing-cluster' in result.summary
+
 
 class TestEKSNetworkingHandlerChecks:
     """Tests for the EKSNetworkingHandler check methods."""

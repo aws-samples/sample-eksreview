@@ -213,10 +213,23 @@ def main() -> None:
         logger.info("MCP client disconnected")
 
 
+_sigint_seen = False
+
+
 def handle_sigint(sig, frame):
     """SIGINT handler — kept thin so default KeyboardInterrupt-raising
     behavior unwinds cleanly through main()'s try/finally.
+
+    Idempotent: the first Ctrl+C raises KeyboardInterrupt to unwind the
+    session. A second Ctrl+C (e.g. while report-compiler threads are being
+    joined at interpreter shutdown) is ignored, so it can't re-raise inside
+    threading._shutdown and print an "Exception ignored on threading
+    shutdown" traceback.
     """
+    global _sigint_seen
+    if _sigint_seen:
+        return
+    _sigint_seen = True
     raise KeyboardInterrupt
 
 

@@ -140,11 +140,24 @@ class EKSNetworkingHandler:
             if not clients:
                 return self._create_error_response(cluster_name, "Failed to initialize required clients")
 
-            # Get cluster info once for sharing between checks
+            # Get cluster info once for sharing between checks.
+            # If describe_cluster fails (e.g. the cluster does not exist or
+            # the identity lacks access), there is nothing meaningful to
+            # check — every networking check depends on the cluster's VPC
+            # config. Fail fast with an error response so callers see the
+            # real cause, consistent with the other domain handlers, rather
+            # than running all checks against empty data and reporting a
+            # misleading "passed" result.
             cluster_info = await self._get_cluster_info(clients['eks'], cluster_name)
-            if cluster_info:
-                clients['cluster_info'] = cluster_info
-                logger.info(f'Retrieved cluster VPC info: {cluster_info.get("vpc_id", "unknown")}')
+            if not cluster_info:
+                return self._create_error_response(
+                    cluster_name,
+                    "Failed to get cluster credentials: could not describe cluster "
+                    f"'{cluster_name}'. Verify the cluster name and region, and that "
+                    "your identity has eks:DescribeCluster permission.",
+                )
+            clients['cluster_info'] = cluster_info
+            logger.info(f'Retrieved cluster VPC info: {cluster_info.get("vpc_id", "unknown")}')
 
             # Fetch nodes once for sharing between N2 and N3
             if clients.get('k8s'):
