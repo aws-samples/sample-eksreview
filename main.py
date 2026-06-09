@@ -37,10 +37,11 @@ import os
 import signal
 import sys
 import time as _time
+from contextlib import suppress
 
 # Enable ANSI escape codes on Windows
 if os.name == "nt":
-    try:
+    with suppress(Exception):
         import ctypes
 
         kernel32 = ctypes.windll.kernel32
@@ -48,8 +49,6 @@ if os.name == "nt":
         mode = ctypes.c_ulong()
         kernel32.GetConsoleMode(handle, ctypes.byref(mode))
         kernel32.SetConsoleMode(handle, mode.value | 0x0004)
-    except Exception:
-        pass
 
 from eks_review_agent.agent import create_agent
 from eks_review_agent.cli.banner import (

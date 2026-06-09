@@ -73,5 +73,6 @@ def print_startup_tip_box() -> None:
         "clusters. Checks security, networking, resiliency,",
         "Karpenter, and Cluster Autoscaler configurations.",
         "",
-        f"Tip: {random.choice(TIPS)}",
+        # Cosmetic tip selection only — not security-sensitive (ruff S311).
+        f"Tip: {random.choice(TIPS)}",  # noqa: S311
     ])

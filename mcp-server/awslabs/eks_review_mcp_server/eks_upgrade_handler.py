@@ -175,6 +175,17 @@ class EKSUpgradeHandler:
         """
         try:
             import urllib.request
+            from urllib.parse import urlparse
+
+            # Defense in depth: only ever fetch over https. The URL is a
+            # hardcoded constant today, but enforcing the scheme keeps this
+            # safe if it ever becomes configurable, and rules out file:// or
+            # other local-scheme reads (bandit B310).
+            if urlparse(url).scheme != 'https':
+                logger.warning(
+                    f'Refusing deprecation DB fetch: non-https URL {url!r}'
+                )
+                return None
 
             req = urllib.request.Request(
                 url,
@@ -183,7 +194,9 @@ class EKSUpgradeHandler:
                     'Accept': 'text/plain, application/x-yaml, application/yaml',
                 },
             )
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            # https scheme is enforced above, so B310 (file://-style schemes)
+            # cannot apply here.
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310
                 # Reject obviously-wrong content types (e.g. an HTML error page).
                 ctype = (resp.headers.get('Content-Type') or '').lower()
                 if ctype and not any(

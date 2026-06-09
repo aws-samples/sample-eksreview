@@ -17,18 +17,17 @@ import os
 import sys
 import threading
 import time
+from contextlib import suppress
 
 # Enable ANSI on Windows
 if os.name == "nt":
-    try:
+    with suppress(Exception):
         import ctypes
         kernel32 = ctypes.windll.kernel32
         handle = kernel32.GetStdHandle(-11)
         mode = ctypes.c_ulong()
         kernel32.GetConsoleMode(handle, ctypes.byref(mode))
         kernel32.SetConsoleMode(handle, mode.value | 0x0004)
-    except Exception:
-        pass
 
 _seen_tool_ids: set[str] = set()
 _response_started = False

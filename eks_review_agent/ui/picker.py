@@ -6,6 +6,7 @@ numbered input on Windows.
 
 import os
 import sys
+from contextlib import suppress
 
 IS_WINDOWS = os.name == "nt"
 
@@ -19,7 +20,7 @@ def _enable_windows_ansi():
     """Enable ANSI escape codes on Windows."""
     if not IS_WINDOWS:
         return
-    try:
+    with suppress(Exception):
         import ctypes
         kernel32 = ctypes.windll.kernel32
         # STD_OUTPUT_HANDLE = -11
@@ -28,8 +29,6 @@ def _enable_windows_ansi():
         kernel32.GetConsoleMode(handle, ctypes.byref(mode))
         # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
         kernel32.SetConsoleMode(handle, mode.value | 0x0004)
-    except Exception:
-        pass
 
 
 def pick(options: list[str], title: str = "Select:", selected: int = 0) -> int | None:
@@ -90,15 +89,11 @@ def _pick_arrow(options: list[str], title: str, selected: int) -> int | None:
 
     def _restore():
         """Always-safe terminal restore. Idempotent."""
-        try:
+        with suppress(Exception):
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        except Exception:
-            pass
-        try:
+        with suppress(Exception):
             sys.stdout.write(SHOW)
             sys.stdout.flush()
-        except Exception:
-            pass
 
     def _read_key():
         ch = sys.stdin.read(1)
