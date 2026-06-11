@@ -63,7 +63,7 @@ pycryptodome==3.23.0
 pydantic==2.12.5
 pydantic-settings==2.13.1
 pydantic_core==2.41.5
-Pygments==2.19.2
+Pygments==2.20.0
 pyinstaller==6.19.0
 pyinstaller-hooks-contrib==2026.3
 PyJWT==2.12.1

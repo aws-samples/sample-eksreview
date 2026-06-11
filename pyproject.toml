@@ -45,6 +45,9 @@ dependencies = [
     # <=1.0.0 mis-validates the Host header, poisoning request.url.path
     # and allowing path-based auth bypass.
     "starlette>=1.0.1,<2.0.0",
+    # Transitive via rich, floored for security:
+    # <2.20.0 has a ReDoS in the AdlLexer GUID regex.
+    "Pygments>=2.20.0,<3.0.0",
 ]
 
 [project.optional-dependencies]
