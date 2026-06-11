@@ -1,13 +1,70 @@
 # eksreview
 
-**Operations Reviewer for Amazon EKS** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
+**eksreview** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
 
-Using natural language, eksreview runs **93 best-practice checks** across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), plus a **38-check upgrade-readiness assessment** with a clear go or no-go verdict. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding for its root cause, apply guided fixes step by step, and export results to a JIRA-ready CSV.
+Using natural language, eksreview runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), and also evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding to understand how it affects your cluster, apply guided fixes step by step, and export results to a JIRA-ready CSV.
+
+Its answers are grounded in a **local knowledge base** — the official EKS Best Practices Guide, plus any runbooks or docs you index — so guidance is cited rather than guessed. Behind the scenes, **skills** give the agent structured playbooks for reviewing, investigating, and compiling reports, keeping its output consistent run to run. Everything runs locally and read-only by default.
+
+---
+
+## 60-second start
+
+Clone, install, and start your first review. You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), AWS credentials, and Amazon Bedrock model access (see [Prerequisites](#prerequisites)).
+
+```bash
+# 1. Clone and set up (creates a .venv and installs everything)
+git clone https://github.com/aws-samples/eksreview.git
+cd eksreview
+./install.sh
+
+# 2. Set AWS credentials and the region your cluster runs in.
+#    Use `aws configure`, or export keys directly:
+export AWS_ACCESS_KEY_ID=<your-access-key-id>
+export AWS_SECRET_ACCESS_KEY=<your-secret-access-key>
+export AWS_SESSION_TOKEN=<your-session-token>     # only for temporary credentials
+export AWS_REGION=<your-region>                   # e.g. the region your cluster runs in
+
+# 3. Launch the agent (auto-activates the virtual environment)
+./eksreview
+```
+
+Then, at the `›` prompt, ask for a review in plain English:
+
+```text
+review my cluster my-cluster in <your-region>
+```
+
+A prioritized report saves to `reports/` in a few minutes. From there, try `/investigate` to dig into a finding or `/fix` to remediate one step by step.
+
+### Bedrock and EKS in different accounts
+
+If your Bedrock model access lives in one account and your EKS clusters in another, point the cluster calls at one account and Bedrock at the other:
+
+```bash
+# Cluster account → EKS / EC2 / IAM / Kubernetes calls
+export AWS_ACCESS_KEY_ID=<cluster-account-access-key-id>
+export AWS_SECRET_ACCESS_KEY=<cluster-account-secret-access-key>
+export AWS_REGION=<cluster-region>                # e.g. the region your cluster runs in
+
+# Central Bedrock account → model calls only
+export BEDROCK_AWS_ACCESS_KEY_ID=<bedrock-account-access-key-id>
+export BEDROCK_AWS_SECRET_ACCESS_KEY=<bedrock-account-secret-access-key>
+export BEDROCK_AWS_SESSION_TOKEN=<bedrock-account-session-token>   # if temporary
+export BEDROCK_AWS_REGION=<bedrock-region>        # where Bedrock model access is enabled
+
+./eksreview
+```
+
+The MCP subprocess that talks to your cluster only ever receives the `AWS_*` credentials; the `BEDROCK_AWS_*` values are kept separate and never reach it. eksreview consumes already-resolved credentials — it does not assume roles itself. If your Bedrock access is behind an IAM role, assume it yourself (e.g. `aws sts assume-role` or a named profile) and export the resulting temporary credentials into the `BEDROCK_AWS_*` variables; see [Cross-account: Bedrock in one account, EKS in another](#cross-account-bedrock-in-one-account-eks-in-another) for step-by-step examples.
 
 ---
 
 ## Table of Contents
 
+
+- [60-second start](#60-second-start)
+  - [Bedrock and EKS in different accounts](#bedrock-and-eks-in-different-accounts)
 - [Why eksreview](#why-eksreview)
 - [How it works](#how-it-works)
 - [Features](#features)
@@ -59,8 +116,8 @@ You do not need to install or run the MCP server yourself. It ships in the `mcp-
 
 ## Features
 
-- **Full cluster review:** 93 best-practice checks across security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability, compiled into one report.
-- **Upgrade readiness:** 38 checks covering control plane, addons, deprecated APIs, third-party components, and workload resilience, with a go or no-go verdict and an ordered upgrade plan.
+- **Full cluster review:** best-practice checks across security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability, compiled into one report.
+- **Upgrade readiness:** checks covering control plane, addons, deprecated APIs, third-party components, and workload resilience, with a go or no-go verdict and an ordered upgrade plan.
 - **Guided remediation (`/fix`):** walks through fixes one at a time, classifies each as patchable, AWS CLI, or manifest change, and confirms before running anything.
 - **Root cause analysis (`/investigate`):** correlates findings, runs read-only live diagnostics, and assesses real risk beyond the static report.
 - **Multi-cluster (conversational):** ask the agent to review several clusters in one session and it works through them one after another. (The `/upgrade` slash command targets one cluster per invocation.)
@@ -74,18 +131,18 @@ You do not need to install or run the MCP server yourself. It ships in the `mcp-
 
 ## What gets checked
 
-A full review evaluates up to **93 checks** across six domains. The exact number that runs depends on what's deployed (for example, Cluster Autoscaler checks that need a CA deployment are skipped on Karpenter-only clusters).
+A full review evaluates checks across six domains. The exact number that runs depends on what's deployed (for example, Cluster Autoscaler checks that need a CA deployment are skipped on Karpenter-only clusters).
 
-| Domain | Checks | Examples |
-|---|---|---|
-| **Security** | 26 | Endpoint access control, secrets encryption, Pod Security Standards, non-root containers, privilege escalation, IRSA / Pod Identity, anonymous RBAC bindings, private subnets |
-| **Resiliency** | 29 | Liveness/readiness/startup probes, PodDisruptionBudgets, multi-replica workloads, anti-affinity, HPA/VPA, resource requests/limits, multi-AZ spread, node autoscaling |
-| **Networking** | 9 | Endpoint access control, multi-AZ node distribution, private subnet placement, VPC CNI configuration, subnet IP availability |
-| **Karpenter** | 10 | NodePool limits, disruption settings, AMI pinning, instance-type diversity, Spot consolidation |
-| **Cluster Autoscaler** | 14 | Version match, auto-discovery tags, least-privilege IAM, expander strategy, node group setup |
-| **Observability** | 5 | API server error/throttling rates, scheduler pending pods, etcd size, admission webhook latency |
+| Domain | Examples |
+|---|---|
+| **Security** | Endpoint access control, secrets encryption, Pod Security Standards, non-root containers, privilege escalation, IRSA / Pod Identity, anonymous RBAC bindings, private subnets |
+| **Resiliency** | Liveness/readiness/startup probes, PodDisruptionBudgets, multi-replica workloads, anti-affinity, HPA/VPA, resource requests/limits, multi-AZ spread, node autoscaling |
+| **Networking** | Endpoint access control, multi-AZ node distribution, private subnet placement, VPC CNI configuration, subnet IP availability |
+| **Karpenter** | NodePool limits, disruption settings, AMI pinning, instance-type diversity, Spot consolidation |
+| **Cluster Autoscaler** | Version match, auto-discovery tags, least-privilege IAM, expander strategy, node group setup |
+| **Observability** | API server error/throttling rates, scheduler pending pods, etcd size, admission webhook latency |
 
-Upgrade readiness adds **38 checks** covering control plane version and support status, addon compatibility and health, deprecated API usage, third-party component compatibility, data plane readiness, and workload resilience, concluding with a go or no-go verdict and an ordered upgrade plan.
+Upgrade readiness adds checks covering control plane version and support status, addon compatibility and health, deprecated API usage, third-party component compatibility, data plane readiness, and workload resilience, concluding with a go or no-go verdict and an ordered upgrade plan.
 
 Each finding carries a severity (Critical / High / Medium / Low), the impacted resources, and a specific remediation.
 
@@ -93,20 +150,14 @@ Each finding carries a severity (Critical / High / Medium / Low), the impacted r
 
 ## Cost
 
-eksreview is free and open source, but it calls Claude on Amazon Bedrock, so **each run incurs Amazon Bedrock token charges** on your AWS account. (The EKS, EC2, and IAM API calls it makes are read-only and effectively free.)
+eksreview is free and open source, but it calls Claude on Amazon Bedrock, so **you incur Amazon Bedrock charges depending on which model you use** and how much work each session does. (The EKS, EC2, and IAM API calls it makes are read-only and effectively free.)
 
-Cost scales with how much work a session does: a full 6-domain review reads all the check output and writes a complete report, so it uses more tokens than a single-domain check or a quick follow-up question. Larger clusters produce larger reports and cost more.
+A few ways to keep an eye on it:
 
-You don't have to guess. The tool tracks it for you:
+- **`/context`** shows an approximate running session cost and token usage.
+- **`/model sonnet`** switches to a cheaper, faster model mid-session.
 
-- **`/context`** shows an **approximate running session cost** along with token counts and context-window usage. Run it any time to see roughly what the session has cost so far.
-- **`/model sonnet`** switches to Sonnet mid-session, which has lower per-token rates than the default Opus and is fast enough for most reviews.
-- **Scope the review:** run single domains ("check only security") when you don't need a full assessment.
-- **Prompt caching** is enabled automatically, which reduces the cost of multi-turn sessions on the same cluster.
-
-For the current per-token rates, see the [Amazon Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/).
-
-> **Note:** the `/context` cost is an *approximation*. It multiplies the session's token counts by per-token rates built into the tool. It is not pulled from AWS billing, doesn't reflect regional price differences, and may drift if Bedrock prices change. Use it as a rough guide; your AWS bill (Cost Explorer or the Bedrock pricing page) is the source of truth.
+For current per-token rates, see the [Amazon Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/). The `/context` figure is a rough estimate; your AWS bill is the source of truth.
 
 ---
 
@@ -126,34 +177,13 @@ For the current per-token rates, see the [Amazon Bedrock pricing page](https://a
 
 ## Quick Start
 
-```bash
-git clone https://github.com/aws-samples/eksreview.git
-cd eksreview
+The [60-second start](#60-second-start) at the top is the fast path: `git clone` → `./install.sh` → set credentials and `AWS_REGION` → `./eksreview`. This section covers two things it doesn't: the region requirement and a manual setup without `install.sh`.
 
-# One-command setup: creates .venv and installs dependencies
-./install.sh
-
-# Configure AWS credentials if you haven't already
-aws configure
-
-# Set the region where your cluster lives (the checks require a region)
-export AWS_REGION=us-west-2
-
-# Launch the agent (auto-activates the virtual environment)
-./eksreview
-```
-
-At the prompt, type a request in plain English:
-
-```
-› review my cluster my-cluster in us-east-1
-```
-
-A full report saves to `reports/` in a few minutes.
-
-> **Tip:** always include the AWS region in your request (or set `AWS_REGION`). The checks require a region; without one they fail fast and no report is generated.
+> **Tip:** always include the AWS region in your request (e.g. "review eks-prod in us-east-1") or set `AWS_REGION`. The checks require a region; without one they fail fast and no report is generated.
 
 ### Manual setup (alternative to install.sh)
+
+If you'd rather not use `./install.sh`:
 
 ```bash
 python3 -m venv .venv
@@ -208,7 +238,7 @@ Notes on specific commands:
 
 Every capability can be driven with natural language. Use these as a starting point; phrasing is flexible.
 
-**Full cluster review:** runs all 93 checks across six domains and compiles a report.
+**Full cluster review:** runs all checks across six domains and compiles a report.
 ```
 › review my cluster eks-prod in us-east-1
 › run a full best-practice assessment on eks-prod
@@ -222,7 +252,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › just review Karpenter configuration for eks-prod
 ```
 
-**Upgrade readiness:** 38-check go or no-go assessment with an ordered upgrade plan.
+**Upgrade readiness:** go or no-go assessment with an ordered upgrade plan.
 ```
 › is eks-prod ready to upgrade?
 › check upgrade readiness for eks-prod in us-east-1
@@ -250,7 +280,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › /investigate is our public endpoint actually exploitable?
 › /investigate why are pods running as root
 › /investigate the subnet IP exhaustion finding
-› /investigate why 4 addons report InsufficientReplicas
+› /investigate why several addons report InsufficientReplicas
 ```
 
 **Follow-up questions on a report:** search the saved report by keyword.
@@ -431,17 +461,15 @@ This is all you need for reviews, upgrade-readiness checks, and `/investigate`. 
 
 ### Write permissions (only for `/fix`)
 
-eksreview never writes to AWS or your cluster unless you run `/fix` and confirm a command. Only grant write access if you intend to apply remediations, and prefer a **separate role** for it. The exact permissions depend on what you fix. For example:
+eksreview never writes to AWS or your cluster unless you run `/fix` and confirm a command. The read-only setup above is enough for everything else.
 
-- Enabling control plane logging needs `eks:UpdateClusterConfig`
-- Restricting the endpoint needs `eks:UpdateClusterConfig`
-- Applying Kubernetes manifests (PDBs, quotas, security contexts) needs the corresponding Kubernetes RBAC, not extra IAM
-
-Scope write permissions to the specific actions and resources you expect to change. Run with the read-only policy day-to-day and switch roles only when remediating.
+If you intend to apply remediations, the principal needs **elevated permissions** scoped to what you actually fix — extra IAM actions for AWS-side changes (e.g. `eks:UpdateClusterConfig`) and/or edit-level Kubernetes RBAC for manifest changes. Grant these narrowly, prefer a **separate role**, and use the read-only policy day-to-day, switching only when remediating.
 
 ### Cluster access (Kubernetes RBAC)
 
 IAM gets eksreview to the AWS APIs, but reading pods, deployments, RBAC, and other in-cluster objects requires your IAM principal to be **mapped inside the cluster**. Without this, the AWS calls succeed but the Kubernetes checks fail.
+
+If you review **multiple clusters**, the same IAM principal must be granted this read access (an access entry with `AmazonEKSAdminViewPolicy`, or the equivalent `aws-auth` mapping) in **each** cluster you want to review. The mapping is per-cluster, so a principal mapped only in cluster A can describe resources in A but its Kubernetes checks will fail against cluster B until it's mapped there too. Repeat the steps below for every cluster.
 
 Map your principal using an **EKS access entry** (recommended) or the legacy `aws-auth` ConfigMap:
 
@@ -457,7 +485,7 @@ aws eks associate-access-policy \
   --region us-east-1 \
   --principal-arn arn:aws:iam::111122223333:role/eksreview-readonly \
   --access-scope type=cluster \
-  --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy
+  --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy
 ```
 
 `AmazonEKSViewPolicy` grants read access to most resources. The review reads pods, deployments, statefulsets, daemonsets, namespaces, RBAC (roles/bindings), network policies, storage classes, PDBs, and HPAs. For `/fix` operations that apply manifests, use a role mapped with edit/admin scope instead.
