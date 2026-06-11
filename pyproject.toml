@@ -14,7 +14,37 @@ dependencies = [
     "boto3>=1.42.0,<2.0.0",
     "mcp>=1.26.0,<2.0.0",
     "pdfminer.six>=20221105",
-    "requests>=2.32.0,<3.0.0",
+    "requests>=2.33.0,<3.0.0",
+    # Transitive via strands-agents-tools, floored here for security:
+    # <3.14.0 has multiple CVEs (CookieJar.load() deserialization,
+    # cross-origin cookie leak, multipart header DoS, etc.). We don't
+    # use aiohttp directly.
+    "aiohttp>=3.14.0,<4.0.0",
+    # Transitive via botocore/requests, floored for security:
+    # 2.6.0–2.6.x can over-decompress streamed responses (CWE-409).
+    # We don't use urllib3 directly.
+    "urllib3>=2.7.0,<3.0.0",
+    # Transitive via strands-agents-tools, floored for security:
+    # <12.2.0 has multiple CVEs (FITS decompression bomb, font integer
+    # overflow, nested-coords heap overflow, PDF trailer infinite loop).
+    # We don't use pillow directly.
+    "pillow>=12.2.0,<13.0.0",
+    # Transitive via mcp/uvicorn, floored for security:
+    # <0.0.27 has multipart parsing DoS (part headers + preamble/epilogue).
+    "python-multipart>=0.0.27",
+    # Transitive via pdfminer.six (image extra) etc., floored for security:
+    # <6.1.0 defaults to resolve_entities=True, allowing XXE local file reads.
+    "lxml>=6.1.0,<7.0.0",
+    # Transitive via pdfminer.six, floored for security:
+    # 45.0.0–46.0.6 can buffer-overflow on non-contiguous buffers.
+    "cryptography>=46.0.7",
+    # Transitive via requests, floored for security:
+    # <3.15 is vulnerable to idna.encode() DoS (incomplete CVE-2024-3651 fix).
+    "idna>=3.15",
+    # Transitive via mcp, floored for security:
+    # <=1.0.0 mis-validates the Host header, poisoning request.url.path
+    # and allowing path-based auth bypass.
+    "starlette>=1.0.1,<2.0.0",
 ]
 
 [project.optional-dependencies]
