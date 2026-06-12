@@ -60,6 +60,13 @@ BEDROCK_AWS_SECRET_ACCESS_KEY: str | None = os.environ.get("BEDROCK_AWS_SECRET_A
 BEDROCK_AWS_SESSION_TOKEN: str | None = os.environ.get("BEDROCK_AWS_SESSION_TOKEN")
 BEDROCK_AWS_REGION: str = os.environ.get("BEDROCK_AWS_REGION") or AWS_REGION
 
+# Bedrock API key (bearer token), short- or long-term. Consumed natively by
+# botocore via the AWS_BEARER_TOKEN_BEDROCK environment variable when no
+# explicit BEDROCK_AWS_* access keys are set. We only read it here to decide
+# precedence and to log which auth path is in use; botocore reads the env var
+# itself at client construction.
+BEDROCK_API_KEY: str | None = os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
+
 # ── Paths ───────────────────────────────────────
 REPORTS_DIR: Path = Path(os.environ.get("REPORTS_DIR", "reports"))
 SKILLS_DIR: str = os.environ.get("SKILLS_DIR", "./skills/")

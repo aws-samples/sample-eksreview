@@ -77,6 +77,20 @@ class TestFilterEnv:
             assert key not in env, f"{key} should be filtered out"
         assert env["AWS_REGION"] == "us-west-2"
 
+    def test_bedrock_api_key_dropped(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # AWS_BEARER_TOKEN_BEDROCK matches the AWS_ allow-prefix, so it must be
+        # denied explicitly or it would leak to the cluster-facing subprocess.
+        self._set_env(monkeypatch, {
+            "AWS_BEARER_TOKEN_BEDROCK": "bedrock-api-key-secret",
+            # control: a real AWS_ var should still pass
+            "AWS_REGION": "us-west-2",
+        })
+        env = _filter_env_for_mcp()
+        assert "AWS_BEARER_TOKEN_BEDROCK" not in env, (
+            "Bedrock API key must not reach the MCP subprocess"
+        )
+        assert env["AWS_REGION"] == "us-west-2"
+
     def test_agent_only_config_dropped(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._set_env(monkeypatch, {
             "MODEL_ID": "us.anthropic.claude-opus-4-6-v1",

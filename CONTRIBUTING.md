@@ -56,6 +56,29 @@ You don't need an ADR for renames, bug fixes, dependency bumps, or
 test-only changes. Use the [template](docs/adr/0000-template.md)
 when you do write one.
 
+## Project layout
+
+```
+eksreview/
+├── eksreview                       # Launcher (auto-activates venv)
+├── install.sh                      # One-command setup
+├── main.py                         # Entrypoint: config, MCP, agent factory
+├── pyproject.toml                  # Project metadata + dependencies
+├── eks_review_agent/               # Agent source
+│   ├── cli/                        # REPL and slash commands
+│   ├── core/                       # Model, prompts, steering, observability
+│   ├── orchestration/              # Sub-agent pipelines + MCP integration
+│   ├── reports/                    # Report search + JIRA export
+│   ├── knowledge/                  # Knowledge base + skills
+│   └── ui/                         # Terminal UI + logging
+├── mcp-server/                     # Bundled EKS Review MCP server (checks)
+├── skills/                         # Report/investigation templates
+├── examples/                       # Sample reports (assessment + upgrade)
+├── docs/                           # Architecture + ADRs
+├── reports/                        # Generated reports (runtime)
+└── tests/                          # pytest suite
+```
+
 ## Tests and coverage
 
 Run the test suite locally before opening a PR:

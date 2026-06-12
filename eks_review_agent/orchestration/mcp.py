@@ -51,9 +51,13 @@ def _close_devnull() -> None:
 
 # Vars the subprocess never needs.
 # - BEDROCK_AWS_*: Bedrock-only credentials, consumed by the agent process.
+# - AWS_BEARER_TOKEN_BEDROCK: Bedrock API key. Matches the AWS_ prefix below,
+#   so it must be denied explicitly or it would be forwarded. The MCP server
+#   never calls Bedrock.
 # - Agent-only config: model selection, log level, paths used by the CLI.
 _DENIED_PREFIXES: tuple[str, ...] = ("BEDROCK_AWS_",)
 _DENIED_KEYS: frozenset[str] = frozenset({
+    "AWS_BEARER_TOKEN_BEDROCK",
     "MODEL_ID", "MODEL_TEMPERATURE", "MODEL_MAX_TOKENS",
     "LOG_LEVEL",
     "EKS_MCP_SERVER_DIR",

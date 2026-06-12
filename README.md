@@ -2,9 +2,9 @@
 
 **eksreview** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
 
-Using natural language, eksreview runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), and also evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding to understand how it affects your cluster, apply guided fixes step by step, and export results to a JIRA-ready CSV.
+Using natural language, eksreview runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), and also evaluates **upgrade readiness** with a go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding to understand how it affects your cluster, apply guided fixes step by step, and export results to a JIRA-ready CSV.
 
-Its answers are grounded in a **local knowledge base** — the official EKS Best Practices Guide, plus any runbooks or docs you index — so guidance is cited rather than guessed. Behind the scenes, **skills** give the agent structured playbooks for reviewing, investigating, and compiling reports, keeping its output consistent run to run. Everything runs locally and read-only by default.
+Its answers are grounded in a **local knowledge base** the official EKS Best Practices Guide, plus any runbooks or docs you index so guidance is cited rather than guessed. Behind the scenes, **skills** give the agent structured playbooks for reviewing, investigating, and compiling reports, keeping its output consistent run to run. Everything runs locally and read-only by default.
 
 ---
 
@@ -25,9 +25,15 @@ export AWS_SECRET_ACCESS_KEY=<your-secret-access-key>
 export AWS_SESSION_TOKEN=<your-session-token>     # only for temporary credentials
 export AWS_REGION=<your-region>                   # e.g. the region your cluster runs in
 
+#    Optional: authenticate the Bedrock model with an API key instead of the
+#    credentials above (short- or long-term keys both work):
+export AWS_BEARER_TOKEN_BEDROCK=<your-bedrock-api-key>
+
 # 3. Launch the agent (auto-activates the virtual environment)
 ./eksreview
 ```
+
+> By default the credentials above are used for both the cluster calls and the Bedrock model. A [Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) (`AWS_BEARER_TOKEN_BEDROCK`) authenticates only the model, and can belong to a different account than the cluster credentials. See [Using a Bedrock API key](#using-a-bedrock-api-key).
 
 Then, at the `›` prompt, ask for a review in plain English:
 
@@ -56,7 +62,7 @@ export BEDROCK_AWS_REGION=<bedrock-region>        # where Bedrock model access i
 ./eksreview
 ```
 
-The MCP subprocess that talks to your cluster only ever receives the `AWS_*` credentials; the `BEDROCK_AWS_*` values are kept separate and never reach it. eksreview consumes already-resolved credentials — it does not assume roles itself. If your Bedrock access is behind an IAM role, assume it yourself (e.g. `aws sts assume-role` or a named profile) and export the resulting temporary credentials into the `BEDROCK_AWS_*` variables; see [Cross-account: Bedrock in one account, EKS in another](#cross-account-bedrock-in-one-account-eks-in-another) for step-by-step examples.
+The MCP sub-process that talks to your cluster only uses the `AWS_*` credentials. If your Bedrock access is from a different account, use `aws sts assume-role` to assume the role and export the resulting temporary credentials into the `BEDROCK_AWS_*` variables. see [Cross-account: Bedrock in one account, EKS in another](#cross-account-bedrock-in-one-account-eks-in-another) for step-by-step examples.
 
 ---
 
@@ -87,10 +93,6 @@ The MCP subprocess that talks to your cluster only ever receives the `AWS_*` cre
 - [Safety model](#safety-model)
 - [Troubleshooting](#troubleshooting)
 - [Architecture](#architecture)
-- [Project structure](#project-structure)
-- [Contributing](#contributing)
-- [Security](#security)
-- [License](#license)
 
 ---
 
@@ -501,7 +503,7 @@ kubectl auth can-i list pods --all-namespaces
 A common enterprise setup is to centralize Bedrock model access in one account while the EKS clusters live in others. eksreview supports this by using **two separate credential sources**:
 
 - **EKS / EC2 / IAM calls** use your default AWS credential chain (`AWS_PROFILE`, env keys, SSO, instance role) and `AWS_REGION`.
-- **Bedrock calls** use the dedicated `BEDROCK_AWS_*` variables if set; otherwise they fall back to the same default credentials.
+- **Bedrock calls** use, in order: a Bedrock API key in `AWS_BEARER_TOKEN_BEDROCK` if set; otherwise the dedicated `BEDROCK_AWS_*` access keys if set; otherwise the same default credentials.
 
 To run the model from a central Bedrock account while reviewing a cluster in another account:
 
@@ -518,9 +520,25 @@ export BEDROCK_AWS_REGION=us-west-2
 ```
 
 Notes:
-- The bundled MCP subprocess (which makes the EKS and Kubernetes calls) is given only the `AWS_*` credentials. The `BEDROCK_AWS_*` values are stripped from its environment, so Bedrock credentials never reach the cluster-facing process.
+- The bundled MCP subprocess (which makes the EKS and Kubernetes calls) is given only the `AWS_*` credentials. The `BEDROCK_AWS_*` values and `AWS_BEARER_TOKEN_BEDROCK` are stripped from its environment, so Bedrock credentials never reach the cluster-facing process.
 - If `BEDROCK_AWS_REGION` is unset, Bedrock uses `AWS_REGION`.
 - You can also assume a Bedrock role and export its temporary credentials into the `BEDROCK_AWS_*` variables.
+
+#### Using a Bedrock API key
+
+Instead of access keys, you can authenticate to Bedrock with a [Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) — generate one in the Bedrock console and export it as `AWS_BEARER_TOKEN_BEDROCK`:
+
+```bash
+# Cluster account → EKS / EC2 / IAM / Kubernetes calls
+export AWS_PROFILE=eks-cluster-account
+export AWS_REGION=us-east-1
+
+# Bedrock API key → model calls (short- or long-term keys both work)
+export AWS_BEARER_TOKEN_BEDROCK=<your-bedrock-api-key>
+export BEDROCK_AWS_REGION=us-west-2     # the region the key was generated for
+```
+
+Both **short-term** keys (expire with your session, up to 12 hours) and **long-term** keys (a fixed expiry you set) use the same variable. When `AWS_BEARER_TOKEN_BEDROCK` is set it takes precedence over `BEDROCK_AWS_*` access keys for Bedrock calls. Short-term keys are recommended; long-term keys are best kept to local exploration.
 
 #### Assuming a Bedrock role in the central account
 
@@ -600,6 +618,7 @@ eksreview reads configuration from environment variables. Defaults are sensible;
 | `BEDROCK_AWS_ACCESS_KEY_ID` | — | Cross-account credentials for Bedrock |
 | `BEDROCK_AWS_SECRET_ACCESS_KEY` | — | Cross-account credentials for Bedrock |
 | `BEDROCK_AWS_SESSION_TOKEN` | — | Cross-account session token for Bedrock |
+| `AWS_BEARER_TOKEN_BEDROCK` | — | Bedrock API key (short- or long-term); takes precedence over `BEDROCK_AWS_*` for Bedrock calls |
 | `EKS_MCP_SERVER_DIR` | bundled `./mcp-server` | Override the MCP server path (dev only) |
 | `EKS_REVIEW_NO_SHELL` | — | Set to `1` to disable command execution (same as `--no-shell`) |
 | `EKS_REVIEW_OFFLINE` | — | Set to `1` to skip the EKS Best Practices PDF sync at startup |
@@ -744,54 +763,3 @@ Type `/context` to see token usage and cost. Switch to a cheaper model mid-sessi
 For trust boundaries, the layered safety stack, and the two-tier sub-agent orchestration, see [`docs/architecture.md`](docs/architecture.md). Design decisions are recorded as [Architecture Decision Records](docs/adr/README.md).
 
 ---
-
-## Project structure
-
-```
-eksreview/
-├── eksreview                       # Launcher (auto-activates venv)
-├── install.sh                      # One-command setup
-├── main.py                         # Entrypoint: config, MCP, agent factory
-├── pyproject.toml                  # Project metadata + dependencies
-├── eks_review_agent/               # Agent source
-│   ├── cli/                        # REPL and slash commands
-│   ├── core/                       # Model, prompts, steering, observability
-│   ├── orchestration/              # Sub-agent pipelines + MCP integration
-│   ├── reports/                    # Report search + JIRA export
-│   ├── knowledge/                  # Knowledge base + skills
-│   └── ui/                         # Terminal UI + logging
-├── mcp-server/                     # Bundled EKS Review MCP server (checks)
-├── skills/                         # Report/investigation templates
-├── examples/                       # Sample reports (assessment + upgrade)
-├── docs/                           # Architecture + ADRs
-├── reports/                        # Generated reports (runtime)
-└── tests/                          # pytest suite
-```
-
----
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
-
-Run the test suite:
-
-```bash
-./install.sh --dev
-source .venv/bin/activate
-pytest --cov --cov-fail-under=60
-```
-
----
-
-## Security
-
-If you discover a potential security issue, please notify AWS/Amazon Security via the [vulnerability reporting page](https://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public issue.
-
----
-
-## License
-
-Licensed under the MIT-0 License. See [LICENSE](LICENSE).
-
-This sample is provided for illustrative purposes. It is not an official AWS service and comes with no warranty or production support guarantee.

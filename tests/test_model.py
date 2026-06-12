@@ -113,3 +113,96 @@ class TestListModelsFormatted:
         assert "Aliases" in out
         for alias in MODEL_ALIASES:
             assert alias in out
+
+
+class TestCreateBedrockSession:
+    """Credential precedence in _create_bedrock_session.
+
+    Order: explicit BEDROCK_AWS_* access keys → AWS_BEARER_TOKEN_BEDROCK
+    (Bedrock API key) → default AWS credential chain.
+    """
+
+    def _patch(self, monkeypatch: pytest.MonkeyPatch, **values) -> dict:
+        """Patch model-module config constants and capture Session kwargs."""
+        import eks_review_agent.core.model as model
+
+        defaults = {
+            "BEDROCK_AWS_ACCESS_KEY_ID": None,
+            "BEDROCK_AWS_SECRET_ACCESS_KEY": None,
+            "BEDROCK_AWS_SESSION_TOKEN": None,
+            "BEDROCK_AWS_REGION": "us-east-1",
+            "BEDROCK_API_KEY": None,
+        }
+        defaults.update(values)
+        for name, val in defaults.items():
+            monkeypatch.setattr(model, name, val)
+
+        captured: dict = {}
+
+        def fake_session(**kwargs):
+            captured.update(kwargs)
+            return object()
+
+        monkeypatch.setattr(model.boto3, "Session", fake_session)
+        return captured
+
+    def test_bearer_token_takes_precedence(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # botocore applies AWS_BEARER_TOKEN_BEDROCK to the bedrock-runtime
+        # client regardless of session credentials, so when both the API key
+        # and explicit BEDROCK_AWS_* keys are set, the API key wins. We honor
+        # that order: the session is built without explicit access keys.
+        import eks_review_agent.core.model as model
+
+        captured = self._patch(
+            monkeypatch,
+            BEDROCK_AWS_ACCESS_KEY_ID="AKIA",
+            BEDROCK_AWS_SECRET_ACCESS_KEY="secret",
+            BEDROCK_AWS_SESSION_TOKEN="token",
+            BEDROCK_API_KEY="bedrock-api-key",
+        )
+        model._create_bedrock_session()
+        assert "aws_access_key_id" not in captured
+        assert captured == {"region_name": "us-east-1"}
+
+    def test_explicit_access_keys_used_when_no_bearer_token(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import eks_review_agent.core.model as model
+
+        captured = self._patch(
+            monkeypatch,
+            BEDROCK_AWS_ACCESS_KEY_ID="AKIA",
+            BEDROCK_AWS_SECRET_ACCESS_KEY="secret",
+            BEDROCK_AWS_SESSION_TOKEN="token",
+        )
+        model._create_bedrock_session()
+        assert captured["aws_access_key_id"] == "AKIA"
+        assert captured["aws_secret_access_key"] == "secret"
+        assert captured["aws_session_token"] == "token"
+
+    def test_bearer_token_used_when_no_access_keys(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import eks_review_agent.core.model as model
+
+        captured = self._patch(
+            monkeypatch,
+            BEDROCK_API_KEY="bedrock-api-key",
+        )
+        model._create_bedrock_session()
+        # Bearer auth is applied by botocore from the env; the session is just
+        # region-scoped with no explicit credentials passed.
+        assert "aws_access_key_id" not in captured
+        assert captured == {"region_name": "us-east-1"}
+
+    def test_default_chain_when_nothing_set(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import eks_review_agent.core.model as model
+
+        captured = self._patch(monkeypatch)
+        model._create_bedrock_session()
+        assert "aws_access_key_id" not in captured
+        assert captured == {"region_name": "us-east-1"}

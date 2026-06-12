@@ -18,6 +18,7 @@ from eks_review_agent.config import (
     BEDROCK_AWS_SECRET_ACCESS_KEY,
     BEDROCK_AWS_SESSION_TOKEN,
     BEDROCK_AWS_REGION,
+    BEDROCK_API_KEY,
 )
 
 logger = logging.getLogger("eksreview")
@@ -90,14 +91,31 @@ from eks_review_agent.session import get_session as _get_session
 def _create_bedrock_session() -> boto3.Session:
     """Create a boto3 session for Bedrock.
 
-    If BEDROCK_AWS_ACCESS_KEY_ID is set, uses those credentials (assumed role
-    from a different account). Otherwise falls back to default credentials
-    (same account as EKS).
+    Credential precedence (most specific first):
+      1. AWS_BEARER_TOKEN_BEDROCK — a Bedrock API key (short- or long-term).
+         botocore applies bearer-token auth to the bedrock-runtime client
+         whenever this env var is set, overriding any session credentials, so
+         we honor that order here too.
+      2. BEDROCK_AWS_ACCESS_KEY_ID + BEDROCK_AWS_SECRET_ACCESS_KEY
+         (+ optional session token) — explicit access keys, e.g. an assumed
+         role in a separate Bedrock account.
+      3. Default AWS credential chain (profile, env keys, SSO, instance role).
+
+    The Bedrock credential is independent of the credentials used for the
+    EKS/EC2/IAM/Kubernetes calls, so the model and the cluster can live in
+    different accounts.
 
     Region is resolved from BEDROCK_AWS_REGION > AWS_REGION > AWS_DEFAULT_REGION >
     boto3 default chain (config file, instance metadata).
     """
     region = BEDROCK_AWS_REGION or None  # None lets boto3 resolve from its own chain
+
+    if BEDROCK_API_KEY:
+        # botocore reads AWS_BEARER_TOKEN_BEDROCK from the environment at client
+        # construction and uses bearer auth for the bedrock-runtime client,
+        # regardless of any session credentials. Nothing extra to pass here.
+        logger.info("Using Bedrock API key (AWS_BEARER_TOKEN_BEDROCK)")
+        return boto3.Session(region_name=region)
 
     if BEDROCK_AWS_ACCESS_KEY_ID and BEDROCK_AWS_SECRET_ACCESS_KEY:
         logger.info("Using separate Bedrock credentials (cross-account)")
