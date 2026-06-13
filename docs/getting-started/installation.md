@@ -6,8 +6,8 @@ Clone, install, and start your first review. You need Python 3.10+, [`uv`](https
 
 ```bash
 # 1. Clone and set up (creates a .venv and installs everything)
-git clone https://github.com/aws-samples/eksreview.git
-cd eksreview
+git clone https://github.com/aws-samples/sample-eksreview.git
+cd sample-eksreview
 ./install.sh
 
 # 2. Set AWS credentials and the region your cluster runs in.

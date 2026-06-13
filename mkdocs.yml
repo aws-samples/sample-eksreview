@@ -2,8 +2,8 @@ site_name: eksreview
 site_description: >-
   AI-powered conversational CLI agent that reviews Amazon EKS clusters against
   operational best practices.
-repo_name: aws-samples/eksreview
-repo_url: https://github.com/aws-samples/eksreview
+repo_name: aws-samples/sample-eksreview
+repo_url: https://github.com/aws-samples/sample-eksreview
 edit_uri: edit/main/docs/
 
 theme:

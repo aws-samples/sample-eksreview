@@ -1,4 +1,4 @@
-name: docs
+name: Documentation
 
 on:
   push:
@@ -8,25 +8,23 @@ on:
       - "mkdocs.yml"
       - "docs-requirements.txt"
       - ".github/workflows/docs.yml"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
-# Allow the workflow to publish to GitHub Pages.
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Only one concurrent deploy; in-progress runs are allowed to finish.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
   build:
-    name: build site
+    name: Build documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,6 +35,13 @@ jobs:
       - name: Install docs dependencies
         run: pip install -r docs-requirements.txt
 
+      - name: Configure GitHub Pages
+        # Enables Pages for the repo (source = GitHub Actions) if not already,
+        # and exposes the base_url. Requires Pages to be allowed for the org.
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - name: Build site
         run: mkdocs build --clean
 
@@ -46,13 +51,16 @@ jobs:
           path: site
 
   deploy:
-    name: deploy to GitHub Pages
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
