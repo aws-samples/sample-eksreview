@@ -35,13 +35,6 @@ jobs:
       - name: Install docs dependencies
         run: pip install -r docs-requirements.txt
 
-      - name: Configure GitHub Pages
-        # Enables Pages for the repo (source = GitHub Actions) if not already,
-        # and exposes the base_url. Requires Pages to be allowed for the org.
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Build site
         run: mkdocs build --clean
 
