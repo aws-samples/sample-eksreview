@@ -4,18 +4,18 @@
 
 Using natural language, it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability) and evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can investigate a finding, apply guided fixes step by step, and export results to a JIRA-ready CSV. Answers are grounded in a local knowledge base (the official EKS Best Practices Guide plus any docs you index), and everything runs locally and read-only by default.
 
-📖 **Full documentation: https://aws-samples.github.io/eksreview/**
+📖 **Full documentation: https://aws-samples.github.io/sample-eksreview/**
 
 ---
 
 ## Quick start
 
-You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), AWS credentials, and Amazon Bedrock model access. See the [Prerequisites](https://aws-samples.github.io/eksreview/getting-started/prerequisites/) for details.
+You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), AWS credentials, and Amazon Bedrock model access. See the [Prerequisites](https://aws-samples.github.io/sample-eksreview/getting-started/prerequisites/) for details.
 
 ```bash
 # 1. Clone and set up (creates a .venv and installs everything)
-git clone https://github.com/aws-samples/eksreview.git
-cd eksreview
+git clone https://github.com/aws-samples/sample-eksreview.git
+cd sample-eksreview
 ./install.sh
 
 # 2. Set AWS credentials and the region your cluster runs in
@@ -35,7 +35,7 @@ review my cluster my-cluster in <your-region>
 
 A prioritized report saves to `reports/` in a few minutes. From there, try `/investigate` to dig into a finding or `/fix` to remediate one step by step.
 
-See the [Installation guide](https://aws-samples.github.io/eksreview/getting-started/installation/) for manual setup, Bedrock API keys, and cross-account configuration.
+See the [Installation guide](https://aws-samples.github.io/sample-eksreview/getting-started/installation/) for manual setup, Bedrock API keys, and cross-account configuration.
 
 ---
 
@@ -54,11 +54,11 @@ See the [Installation guide](https://aws-samples.github.io/eksreview/getting-sta
 
 | Topic | |
 |---|---|
-| [Getting started](https://aws-samples.github.io/eksreview/getting-started/installation/) | Install, prerequisites, your first review |
-| [Usage](https://aws-samples.github.io/eksreview/usage/conversational-reviews/) | Conversational reviews, slash commands, example prompts, reports, knowledge base |
-| [Configuration](https://aws-samples.github.io/eksreview/configuration/environment-variables/) | Environment variables, models & regions, credentials, CLI flags |
-| [Reference](https://aws-samples.github.io/eksreview/reference/what-gets-checked/) | What gets checked, permissions, cost, performance, safety, troubleshooting |
-| [Architecture](https://aws-samples.github.io/eksreview/architecture/) | Design, trust boundaries, and decision records |
+| [Getting started](https://aws-samples.github.io/sample-eksreview/getting-started/installation/) | Install, prerequisites, your first review |
+| [Usage](https://aws-samples.github.io/sample-eksreview/usage/conversational-reviews/) | Conversational reviews, slash commands, example prompts, reports, knowledge base |
+| [Configuration](https://aws-samples.github.io/sample-eksreview/configuration/environment-variables/) | Environment variables, models & regions, credentials, CLI flags |
+| [Reference](https://aws-samples.github.io/sample-eksreview/reference/what-gets-checked/) | What gets checked, permissions, cost, performance, safety, troubleshooting |
+| [Architecture](https://aws-samples.github.io/sample-eksreview/architecture/) | Design, trust boundaries, and decision records |
 
 Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) (it includes the project layout and design docs).
 
