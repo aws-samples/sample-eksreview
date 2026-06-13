@@ -1,0 +1,172 @@
+/* ===========================================================================
+   eksreview documentation theme
+   An elegant indigo→violet palette inspired by the mascot, with soft depth,
+   generous spacing, and a refined hero. Keep it calm and premium.
+   =========================================================================== */
+
+/* ── Brand palette ──────────────────────────────────────────── */
+:root {
+  --md-primary-fg-color: #4f46e5;        /* indigo-600 */
+  --md-primary-fg-color--light: #6366f1; /* indigo-500 */
+  --md-primary-fg-color--dark: #4338ca;  /* indigo-700 */
+  --md-accent-fg-color: #7c3aed;         /* violet-600 */
+
+  --eksr-indigo: #6366f1;
+  --eksr-violet: #8b5cf6;
+  --eksr-grad: linear-gradient(120deg, #4f46e5 0%, #7c3aed 100%);
+  --eksr-radius: 14px;
+}
+
+[data-md-color-scheme="default"] {
+  --md-typeset-a-color: #4f46e5;
+}
+
+/* Dark mode: brighten brand tones so they read on the slate background. */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #818cf8;        /* indigo-400 */
+  --md-accent-fg-color: #a78bfa;         /* violet-400 */
+  --md-typeset-a-color: #a5b4fc;
+  --md-default-bg-color: #0f1020;        /* deep indigo-tinted background */
+}
+
+/* ── Typography polish ──────────────────────────────────────── */
+.md-typeset {
+  font-feature-settings: "kern", "liga", "calt";
+}
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+.md-typeset h2 {
+  margin-top: 2.4em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* ── Header: refined diagonal gradient ──────────────────────── */
+.md-header {
+  background: var(--eksr-grad);
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.25);
+}
+.md-tabs {
+  background: transparent;
+}
+
+/* ── Home page hero ─────────────────────────────────────────── */
+.eksr-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  margin: 0.5rem auto 3rem;
+  padding: 3rem 1rem 2.5rem;
+  border-radius: 24px;
+  background:
+    radial-gradient(130% 130% at 50% -10%,
+      rgba(124, 58, 237, 0.16) 0%,
+      rgba(79, 70, 229, 0.08) 38%,
+      transparent 68%);
+}
+
+.eksr-hero .eksr-logo {
+  width: clamp(220px, 28vw, 300px);
+  height: auto;
+  border-radius: 24px;
+  box-shadow:
+    0 18px 50px rgba(124, 58, 237, 0.40),
+    0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+.eksr-hero .eksr-logo:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 24px 60px rgba(124, 58, 237, 0.50),
+    0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.eksr-hero .eksr-title {
+  margin: 1.4rem 0 0;
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  background: linear-gradient(100deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.eksr-hero .eksr-title .headerlink {
+  display: none;
+}
+
+.eksr-hero .eksr-tagline {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--md-default-fg-color--light);
+  max-width: 44rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+/* Call-to-action buttons. */
+.eksr-hero .md-button {
+  margin: 0.25rem 0.4rem;
+  border-radius: 2rem;
+  padding: 0.55rem 1.4rem;
+  font-weight: 600;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.eksr-hero .md-button:hover {
+  transform: translateY(-2px);
+}
+.eksr-hero .md-button--primary {
+  background: var(--eksr-grad);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+}
+.eksr-hero .md-button--primary:hover {
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
+}
+
+/* ── Grid cards (home page) ─────────────────────────────────── */
+.md-typeset .grid.cards > :is(ul, ol) > li {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: var(--eksr-radius);
+  padding: 1.1rem 1.2rem;
+  background: var(--md-default-bg-color);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.md-typeset .grid.cards > :is(ul, ol) > li:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 10px 28px rgba(99, 102, 241, 0.18);
+  transform: translateY(-4px);
+}
+.md-typeset .grid.cards .twemoji svg {
+  fill: var(--md-primary-fg-color);
+}
+
+/* ── Code, admonitions, tables ──────────────────────────────── */
+.md-typeset pre > code {
+  border-radius: 10px;
+}
+.md-typeset :is(.admonition, details) {
+  border-radius: 10px;
+  border-left-width: 3px;
+}
+.md-typeset table:not([class]) {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.md-typeset table:not([class]) th {
+  background: color-mix(in srgb, var(--md-primary-fg-color) 10%, transparent);
+  font-weight: 600;
+}
+
+/* Footer accent. */
+.md-footer-meta {
+  background: rgba(0, 0, 0, 0.85);
+}

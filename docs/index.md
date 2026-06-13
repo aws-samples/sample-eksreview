@@ -1,6 +1,16 @@
-# eksreview
+<div class="eksr-hero" markdown>
 
-**eksreview** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
+![eksreview logo](assets/logo.png){ .eksr-logo }
+
+# eksreview { .eksr-title }
+
+An AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices — in minutes.
+{ .eksr-tagline }
+
+[:material-rocket-launch: Get started](getting-started/installation.md){ .md-button .md-button--primary }
+[:material-github: View on GitHub](https://github.com/aws-samples/sample-eksreview){ .md-button }
+
+</div>
 
 Using natural language, eksreview runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), and also evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding to understand how it affects your cluster, apply guided fixes step by step, and export results to a JIRA-ready CSV.
 
@@ -8,9 +18,9 @@ Its answers are grounded in a **local knowledge base** — the official EKS Best
 
 <div class="grid cards" markdown>
 
-- :material-rocket-launch: **[Get started](getting-started/installation.md)**
+- :material-map-marker-path: **[Your first review](getting-started/first-review.md)**
 
-    Clone, install, and run your first review in a few minutes.
+    Walk through running a review and reading the report.
 
 - :material-checkbox-marked-circle-outline: **[What gets checked](reference/what-gets-checked.md)**
 
