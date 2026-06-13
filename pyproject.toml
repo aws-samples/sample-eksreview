@@ -57,6 +57,11 @@ dev = [
     "ruff>=0.8.0,<1.0.0",
     "pip-audit>=2.7,<3.0",
 ]
+# Documentation site (MkDocs Material). Also mirrored in docs-requirements.txt,
+# which the docs GitHub Actions workflow installs without building the package.
+docs = [
+    "mkdocs-material>=9.5,<10.0",
+]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

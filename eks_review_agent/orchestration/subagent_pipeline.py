@@ -123,11 +123,14 @@ def create_subagent_model() -> Any:
     from eks_review_agent.core.model import (
         AVAILABLE_MODELS,
         _create_bedrock_session,
+        model_id_for_name,
     )
 
     current_name = get_session().get_model_name()
     model_info = AVAILABLE_MODELS.get(current_name, {})
-    model_id = model_info.get("model_id", "us.anthropic.claude-opus-4-8")
+    # model_id_for_name applies the active geo prefix; if current_name is a
+    # raw override id not in the registry, it's returned unchanged.
+    model_id = model_id_for_name(current_name)
     context_window = model_info.get("context_window", 200000)
     is_1m = context_window >= 1000000
 

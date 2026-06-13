@@ -1,0 +1,104 @@
+site_name: eksreview
+site_description: >-
+  AI-powered conversational CLI agent that reviews Amazon EKS clusters against
+  operational best practices.
+repo_name: aws-samples/eksreview
+repo_url: https://github.com/aws-samples/eksreview
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - navigation.tracking
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Prerequisites: getting-started/prerequisites.md
+      - Installation: getting-started/installation.md
+      - Your First Review: getting-started/first-review.md
+  - Usage:
+      - Conversational Reviews: usage/conversational-reviews.md
+      - Slash Commands: usage/slash-commands.md
+      - Example Prompts: usage/example-prompts.md
+      - Reports: usage/reports.md
+      - Knowledge Base: usage/knowledge-base.md
+  - Configuration:
+      - Environment Variables: configuration/environment-variables.md
+      - Models & Regions: configuration/models.md
+      - Credentials & Cross-Account: configuration/credentials.md
+      - Command-line Flags: configuration/cli-flags.md
+  - Reference:
+      - What Gets Checked: reference/what-gets-checked.md
+      - Permissions: reference/permissions.md
+      - Cost: reference/cost.md
+      - Performance & Scale: reference/performance.md
+      - Data & Cleanup: reference/data-and-cleanup.md
+      - Safety Model: reference/safety.md
+      - Troubleshooting: reference/troubleshooting.md
+  - Sample Reports:
+      - Assessment Report: examples/sample-assessment-report.md
+      - Upgrade Readiness Report: examples/sample-upgrade-readiness-report.md
+  - FAQ: faq.md
+  - Architecture:
+      - Overview: architecture.md
+      - Decision Records:
+          - Index: adr/README.md
+          - ADR-001 Sliding-window conversation manager: adr/001-sliding-window-conversation-manager.md
+          - ADR-002 stdio MCP transport: adr/002-stdio-mcp-not-http.md
+          - ADR-003 Two-tier orchestration: adr/003-two-tier-orchestration.md
+          - ADR-004 MCP subprocess env allowlist: adr/004-mcp-subprocess-env-allowlist.md
+          - ADR-005 Layered safety stack: adr/005-layered-safety-stack.md
+          - ADR-006 Skill-driven report compilation: adr/006-skill-driven-report-compilation.md
+          - ADR-007 --no-shell as opt-in: adr/007-no-shell-as-opt-in.md
+          - ADR-008 BM25 over embeddings: adr/008-bm25-over-embeddings.md
+          - ADR-009 Live pluto fetch with validation: adr/009-pluto-live-fetch-with-validation.md
+          - ADR-010 Process-global rate limit: adr/010-process-global-rate-limit.md
+          - ADR-011 Remove confirm_action: adr/011-remove-confirm-action-tool.md
+          - Template: adr/0000-template.md

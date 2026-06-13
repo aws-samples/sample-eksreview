@@ -63,7 +63,7 @@ from eks_review_agent.config import BEDROCK_AWS_REGION, EKS_MCP_SERVER_DIR, MODE
 from eks_review_agent.knowledge.knowledge_tool import get_knowledge_base
 from eks_review_agent.ui.logging_config import setup_logging
 from eks_review_agent.orchestration.mcp import create_mcp_client
-from eks_review_agent.core.model import get_current_model_name
+from eks_review_agent.core.model import _active_geo_prefix, get_current_model_name
 
 
 logger: logging.Logger = None  # type: ignore[assignment]
@@ -94,8 +94,12 @@ def _parse_cli_flags() -> str | None:
 def _print_status(agent, mcp_tools, skills_plugin, session_id: str | None) -> None:
     """Print the model/region/tools/skills/knowledge status block."""
     friendly_model = get_current_model_name() or MODEL_ID
-    print(f"  Model:          {friendly_model}")
-    print(f"  Model Region:   {BEDROCK_AWS_REGION}")
+    # Show the inference-profile scope (global / us / eu / ...) next to the
+    # model, and label the region as the Bedrock API entry region — for a
+    # global profile the model itself isn't pinned to that region.
+    scope = _active_geo_prefix().rstrip(".")
+    print(f"  Model:          {friendly_model} ({scope})")
+    print(f"  Bedrock Region: {BEDROCK_AWS_REGION}")
     print(
         f"  Tools:          {len(mcp_tools)} MCP + "
         f"{len(agent.tool_names) - len(mcp_tools)} built-in"

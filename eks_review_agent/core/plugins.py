@@ -73,19 +73,23 @@ def create_steering_handler() -> LLMSteeringHandler:
     per tool call). Only unknown tools (primarily `shell`) go through the
     full LLM evaluation.
     """
-    from eks_review_agent.core.model import _create_bedrock_session
+    from eks_review_agent.core.model import _active_geo_prefix, _create_bedrock_session
     from strands.models.model import CacheConfig
 
     session = _create_bedrock_session()
+    # Match the geo prefix of the active model so the steering model resolves
+    # in the same geography (global by default, or a regional MODEL_ID override).
+    steering_model_id = f"{_active_geo_prefix()}anthropic.claude-haiku-4-5-20251001-v1:0"
     steering_model = BedrockModel(
-        model_id="us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        model_id=steering_model_id,
         boto_session=session,
         cache_config=CacheConfig(strategy="auto"),
         temperature=0.0,
         max_tokens=8192,
     )
 
-    logger.info("Steering handler using Haiku 4.5 (global), %d tools bypassed", len(_ALWAYS_SAFE_TOOLS))
+    logger.info("Steering handler using Haiku 4.5 (%s), %d tools bypassed",
+                _active_geo_prefix().rstrip("."), len(_ALWAYS_SAFE_TOOLS))
 
     handler = LLMSteeringHandler(
         system_prompt=STEERING_SYSTEM_PROMPT,

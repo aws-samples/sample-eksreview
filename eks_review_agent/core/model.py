@@ -1,7 +1,14 @@
 """Bedrock model provider setup with runtime model switching.
 
 Supports a registry of available models that can be switched at runtime
-via the /model command. Uses global Bedrock endpoints by default.
+via the /model command.
+
+By default the agent uses **global** cross-region inference profiles (the
+`global.` prefix), which route to commercial regions worldwide and work
+from non-US regions. To pin a specific geography, set `MODEL_ID` to a
+regional system inference profile (e.g. `us.anthropic.claude-sonnet-4-6`);
+the agent then uses that profile's geo prefix for the startup model and for
+subsequent `/model` switches.
 """
 
 import logging
@@ -24,43 +31,54 @@ from eks_review_agent.config import (
 logger = logging.getLogger("eksreview")
 
 
-# ── Available models (global endpoints) ─────────
+# ── Available models ─────────
+# Model IDs are stored as "base IDs" (the part after the geo prefix, e.g.
+# "anthropic.claude-opus-4-8"). The actual inference-profile ID is built at
+# runtime by prepending the active geo prefix — "global." by default, or the
+# prefix of an explicit MODEL_ID override. See _active_geo_prefix().
 # Pricing is per 1M tokens (USD). Source: Anthropic pricing on Bedrock.
 # Keep aligned with AVAILABLE_MODELS — a model entry without a pricing
 # entry will fall through to the default below in estimate_cost().
+
+# Default geo prefix for inference profiles when MODEL_ID is not set.
+DEFAULT_GEO_PREFIX = "global."
+
+# Default model (display name) used at startup when MODEL_ID is not set.
+DEFAULT_MODEL_NAME = "claude-opus-4.8"
+
 AVAILABLE_MODELS = {
     "claude-opus-4.8": {
-        "model_id": "us.anthropic.claude-opus-4-8",
-        "description": "Latest and most capable, 1M context (US cross-region)",
+        "base_id": "anthropic.claude-opus-4-8",
+        "description": "Latest and most capable, 1M context",
         "context_window": 1000000,
         "max_output_tokens": 128000,
         "supports_temperature": False,
         "pricing": {"input": 5.00, "output": 25.00, "cache_read": 0.50, "cache_write": 6.25},
     },
     "claude-opus-4.6": {
-        "model_id": "us.anthropic.claude-opus-4-6-v1",
-        "description": "Most capable, 1M context (US cross-region)",
+        "base_id": "anthropic.claude-opus-4-6-v1",
+        "description": "Most capable, 1M context",
         "context_window": 1000000,
         "max_output_tokens": 128000,
         "pricing": {"input": 5.00, "output": 25.00, "cache_read": 0.50, "cache_write": 6.25},
     },
     "claude-opus-4.5": {
-        "model_id": "us.anthropic.claude-opus-4-5-20251101-v1:0",
-        "description": "Previous gen Opus, 1M context (US cross-region)",
+        "base_id": "anthropic.claude-opus-4-5-20251101-v1:0",
+        "description": "Previous gen Opus, 1M context",
         "context_window": 1000000,
         "max_output_tokens": 64000,
         "pricing": {"input": 5.00, "output": 25.00, "cache_read": 0.50, "cache_write": 6.25},
     },
     "claude-sonnet-4.6": {
-        "model_id": "us.anthropic.claude-sonnet-4-6",
-        "description": "Fast and capable, 1M context (US cross-region)",
+        "base_id": "anthropic.claude-sonnet-4-6",
+        "description": "Fast and capable, 1M context",
         "context_window": 1000000,
         "max_output_tokens": 128000,
         "pricing": {"input": 3.00, "output": 15.00, "cache_read": 0.30, "cache_write": 3.75},
     },
     "claude-sonnet-4.5": {
-        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "description": "Previous gen Sonnet, 1M context (US cross-region)",
+        "base_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "description": "Previous gen Sonnet, 1M context",
         "context_window": 1000000,
         "max_output_tokens": 64000,
         "pricing": {"input": 3.00, "output": 15.00, "cache_read": 0.30, "cache_write": 3.75},
@@ -140,17 +158,51 @@ def _resolve_model_name(name: str) -> str | None:
     return None
 
 
+def _active_geo_prefix() -> str:
+    """Geo prefix for inference-profile IDs.
+
+    If MODEL_ID is set to a regional profile (e.g. "us.anthropic.claude-..."),
+    use its prefix so /model switches stay in the same geography. Otherwise
+    default to the global cross-region prefix.
+    """
+    if MODEL_ID:
+        idx = MODEL_ID.find("anthropic.")
+        if idx > 0:
+            return MODEL_ID[:idx]
+    return DEFAULT_GEO_PREFIX
+
+
+def _strip_geo_prefix(model_id: str) -> str:
+    """Return the base ID (drop any leading geo prefix like 'global.'/'us.')."""
+    idx = model_id.find("anthropic.")
+    return model_id[idx:] if idx >= 0 else model_id
+
+
+def model_id_for_name(name: str) -> str:
+    """Resolve a registry display name to a full inference-profile ID.
+
+    Applies the active geo prefix to the model's base ID. If the name isn't in
+    the registry it's returned unchanged (it may itself be a full MODEL_ID
+    override that isn't one of the bundled models).
+    """
+    info = AVAILABLE_MODELS.get(name)
+    if not info:
+        return name
+    return f"{_active_geo_prefix()}{info['base_id']}"
+
+
 def _model_id_to_name(model_id: str, context_1m: bool = True) -> str:
     """Find the display name for a model_id, preferring the matching context variant."""
+    base = _strip_geo_prefix(model_id)
     # Prefer the 1M or 200K variant based on context_1m flag
     for name, info in AVAILABLE_MODELS.items():
-        if info["model_id"] == model_id:
+        if info["base_id"] == base:
             is_1m = info.get("context_window", 200000) >= 1000000
             if is_1m == context_1m:
                 return name
     # Fallback to any match
     for name, info in AVAILABLE_MODELS.items():
-        if info["model_id"] == model_id:
+        if info["base_id"] == base:
             return name
     return model_id
 
@@ -159,13 +211,14 @@ def create_model(model_id: str | None = None, context_1m: bool = True) -> Bedroc
     """Create a Bedrock model instance.
 
     Args:
-        model_id: Bedrock model ID. Defaults to MODEL_ID from config.
+        model_id: Bedrock model ID. Defaults to the explicit MODEL_ID override
+            if set, otherwise the default global profile for DEFAULT_MODEL_NAME.
         context_1m: Whether to enable the 1M context window beta. Default True.
 
     Returns:
         Configured BedrockModel.
     """
-    mid = model_id or MODEL_ID
+    mid = model_id or MODEL_ID or model_id_for_name(DEFAULT_MODEL_NAME)
     session = _create_bedrock_session()
     _get_session().set_model_name(_model_id_to_name(mid, context_1m))
     logger.info("Primary model: %s in %s (1M=%s)", mid, BEDROCK_AWS_REGION, context_1m)
@@ -212,7 +265,7 @@ def create_model_by_name(name: str) -> tuple[BedrockModel, str] | tuple[None, st
 
     info = AVAILABLE_MODELS[resolved]
     is_1m = info.get("context_window", 200000) >= 1000000
-    model = create_model(model_id=info["model_id"], context_1m=is_1m)
+    model = create_model(model_id=model_id_for_name(resolved), context_1m=is_1m)
     return model, resolved
 
 
@@ -270,7 +323,8 @@ def list_models_formatted() -> str:
         lines.append(f"  {marker} {name:<20} {info['description']}")
 
     lines.append(f"\n  Aliases: {', '.join(f'{a} → {t}' for a, t in MODEL_ALIASES.items())}")
-    lines.append(f"  Region: {BEDROCK_AWS_REGION}")
+    lines.append(f"  Profile scope: {_active_geo_prefix().rstrip('.')}")
+    lines.append(f"  Bedrock region: {BEDROCK_AWS_REGION}")
     lines.append(f"\n  Current: {current}")
     lines.append("  Usage: /model <name>  (e.g. /model sonnet)")
     return "\n".join(lines)

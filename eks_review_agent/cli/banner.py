@@ -71,7 +71,7 @@ def print_startup_tip_box() -> None:
         "",
         "Run best-practice reviews against your Amazon EKS",
         "clusters. Checks security, networking, resiliency,",
-        "Karpenter, and Cluster Autoscaler configurations.",
+        "Karpenter, Cluster Autoscaler, and observability.",
         "",
         # Cosmetic tip selection only — not security-sensitive (ruff S311).
         f"Tip: {random.choice(TIPS)}",  # noqa: S311

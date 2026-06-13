@@ -1,0 +1,4 @@
+# Dependencies for building the documentation site (MkDocs + Material).
+# Used locally (`pip install -r docs-requirements.txt && mkdocs serve`) and by
+# the docs GitHub Actions workflow.
+mkdocs-material>=9.5,<10.0

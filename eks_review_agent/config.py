@@ -48,7 +48,7 @@ AWS_REGION: str = (
     or os.environ.get("AWS_DEFAULT_REGION")
     or "us-east-1"
 )
-MODEL_ID: str = os.environ.get("MODEL_ID", "us.anthropic.claude-opus-4-8")
+MODEL_ID: str | None = os.environ.get("MODEL_ID")
 MODEL_TEMPERATURE: float = _env_float("MODEL_TEMPERATURE", 0.1)
 MODEL_MAX_TOKENS: int = _env_int("MODEL_MAX_TOKENS", 128000)
 

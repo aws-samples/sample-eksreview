@@ -37,13 +37,67 @@ class TestResolveModelName:
 
 class TestModelIdToName:
     def test_returns_model_name(self) -> None:
-        # All models are 1M context; each model_id maps to a single name.
+        # Strips the geo prefix and matches the base id, so both global and
+        # regional profile IDs resolve to the same display name.
+        assert _model_id_to_name("global.anthropic.claude-opus-4-8") == "claude-opus-4.8"
         assert _model_id_to_name("us.anthropic.claude-opus-4-8") == "claude-opus-4.8"
         assert _model_id_to_name("us.anthropic.claude-opus-4-6-v1") == "claude-opus-4.6"
-        assert _model_id_to_name("us.anthropic.claude-sonnet-4-6") == "claude-sonnet-4.6"
+        assert _model_id_to_name("global.anthropic.claude-sonnet-4-6") == "claude-sonnet-4.6"
 
     def test_unknown_returns_id(self) -> None:
         assert _model_id_to_name("unknown-id") == "unknown-id"
+
+
+class TestModelIdForName:
+    def test_default_prefix_is_global(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        import eks_review_agent.core.model as model
+
+        monkeypatch.setattr(model, "MODEL_ID", None)
+        assert model._active_geo_prefix() == "global."
+        assert (
+            model.model_id_for_name("claude-opus-4.8")
+            == "global.anthropic.claude-opus-4-8"
+        )
+        assert (
+            model.model_id_for_name("claude-sonnet-4.6")
+            == "global.anthropic.claude-sonnet-4-6"
+        )
+
+    def test_regional_override_prefix(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # An explicit regional MODEL_ID makes /model switches stay regional.
+        import eks_review_agent.core.model as model
+
+        monkeypatch.setattr(model, "MODEL_ID", "us.anthropic.claude-sonnet-4-6")
+        assert (
+            model.model_id_for_name("claude-opus-4.8")
+            == "us.anthropic.claude-opus-4-8"
+        )
+        assert (
+            model.model_id_for_name("claude-sonnet-4.6")
+            == "us.anthropic.claude-sonnet-4-6"
+        )
+
+    def test_eu_override_prefix(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        import eks_review_agent.core.model as model
+
+        monkeypatch.setattr(model, "MODEL_ID", "eu.anthropic.claude-sonnet-4-6")
+        assert model._active_geo_prefix() == "eu."
+        assert (
+            model.model_id_for_name("claude-opus-4.6")
+            == "eu.anthropic.claude-opus-4-6-v1"
+        )
+
+    def test_unknown_name_returned_unchanged(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import eks_review_agent.core.model as model
+
+        monkeypatch.setattr(model, "MODEL_ID", None)
+        # A full override id that isn't a bundled model passes through as-is.
+        assert (
+            model.model_id_for_name("apac.anthropic.claude-nova-1")
+            == "apac.anthropic.claude-nova-1"
+        )
 
 
 class TestPricing:
