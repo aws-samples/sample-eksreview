@@ -1,5 +1,7 @@
 # Installation
 
+Getting eksreview running is a clone, one script, and your AWS credentials. The quickest path is below, with manual setup and cross-account notes after it.
+
 ## 60-second start
 
 Clone, install, and start your first review. You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), AWS credentials, and Amazon Bedrock model access (see [Prerequisites](prerequisites.md)).
@@ -72,7 +74,7 @@ rm -rf reports/ .knowledge/ .sessions/   # optional: generated data (see Data & 
 cd .. && rm -rf eksreview         # the clone itself
 ```
 
-Nothing is installed outside the project directory, so removing the clone leaves no residue in the project — though `uv` may keep a package cache under `~/.cache/uv` (shared with other uv projects; safe to leave or clear with `uv cache clean`).
+Nothing is installed outside the project directory, so removing the clone leaves no residue in the project. One exception: `uv` may keep a package cache under `~/.cache/uv` (shared with other uv projects; safe to leave or clear with `uv cache clean`).
 
 ---
 

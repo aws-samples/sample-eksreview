@@ -1,8 +1,10 @@
 # Prerequisites
 
+Before you install eksreview, make sure your machine and AWS account meet the following. Most of it is standard tooling you probably already have if you work with EKS.
+
 | Requirement | Notes |
 |---|---|
-| **Operating system** | macOS or Linux. On Windows, run it under [WSL](https://learn.microsoft.com/windows/wsl/install) — the `install.sh` and `eksreview` launchers are bash scripts. |
+| **Operating system** | macOS or Linux. On Windows, run it under [WSL](https://learn.microsoft.com/windows/wsl/install), since the `install.sh` and `eksreview` launchers are bash scripts. |
 | **Python 3.10+** | 3.11 or 3.12 recommended |
 | **`uv`** | Required. The bundled MCP server runs via `uv`. [Install guide](https://docs.astral.sh/uv/getting-started/installation/) |
 | **AWS credentials** | With permissions for EKS, EC2, IAM, STS, and Bedrock |

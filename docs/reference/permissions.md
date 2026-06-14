@@ -63,7 +63,7 @@ A few of these actions support specific check domains: `autoscaling:DescribeAuto
 
 eksreview never writes to AWS or your cluster unless you run `/fix` and confirm a command. The read-only setup above is enough for everything else.
 
-If you intend to apply remediations, the principal needs **elevated permissions** scoped to what you actually fix — extra IAM actions for AWS-side changes (e.g. `eks:UpdateClusterConfig`) and/or edit-level Kubernetes RBAC for manifest changes. Grant these narrowly, prefer a **separate role**, and use the read-only policy day-to-day, switching only when remediating.
+If you intend to apply remediations, the principal needs **elevated permissions** scoped to what you actually fix: extra IAM actions for AWS-side changes (e.g. `eks:UpdateClusterConfig`) and/or edit-level Kubernetes RBAC for manifest changes. Grant these narrowly, prefer a **separate role**, and use the read-only policy day-to-day, switching only when remediating.
 
 ## Cluster access (Kubernetes RBAC)
 

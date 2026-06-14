@@ -8,7 +8,7 @@ The bundled MCP server needs `uv`. Install it:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-If checks complete instantly and the agent says the review couldn't run, it's usually missing AWS credentials or a missing region. See the next two items.
+If checks complete instantly and the agent says the review couldn't run, the cause is usually missing AWS credentials or an unset region. See the next two items.
 
 ## All checks fail with "Unable to locate credentials"
 
@@ -24,7 +24,7 @@ Enable model access in the Bedrock console (Model access) for your region, and c
 
 ## "No cluster found" / cluster not found
 
-Make sure `AWS_REGION` is set to the region where the cluster lives, and that your credentials point at the right account. Verify with `aws sts get-caller-identity` and list clusters with `aws eks list-clusters --region <region>`. eksreview connects to the Kubernetes API itself using short-lived STS tokens, so you do **not** need to run `aws eks update-kubeconfig` — but your IAM identity must be mapped into the cluster (see [Permissions](permissions.md)).
+Make sure `AWS_REGION` is set to the region where the cluster lives, and that your credentials point at the right account. Verify with `aws sts get-caller-identity` and list clusters with `aws eks list-clusters --region <region>`. eksreview connects to the Kubernetes API itself using short-lived STS tokens, so you do **not** need to run `aws eks update-kubeconfig`. Your IAM identity must still be mapped into the cluster (see [Permissions](permissions.md)).
 
 ## Session feels expensive or slow
 

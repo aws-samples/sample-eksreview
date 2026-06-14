@@ -1,6 +1,6 @@
 # Example Prompts
 
-Every capability can be driven with natural language. Use these as a starting point; phrasing is flexible.
+Every capability can be driven with natural language. Use these as a starting point; the phrasing is flexible.
 
 **Full cluster review:** runs all checks across six domains and compiles a report.
 ```text
@@ -24,7 +24,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › /upgrade eks-prod us-east-1 to 1.31
 ```
 
-**Multi-cluster:** ask the agent to review several clusters in one session and it works through them one at a time. Use conversational phrasing for this (the `/upgrade` command itself takes one cluster per call).
+**Multi-cluster:** ask the agent to review several clusters in one session and it works through them one at a time. Use conversational phrasing here, since the `/upgrade` command itself takes one cluster per call.
 ```text
 › review eks-prod and eks-staging in us-east-1
 › check upgrade readiness for eks-prod, then eks-staging, targeting 1.31
@@ -39,7 +39,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › /fix pin the Karpenter EC2NodeClass AMI to a specific version
 ```
 
-**Root cause analysis (`/investigate`):** goes beyond the report with live diagnostics.
+**Root cause analysis (`/investigate`):** goes past the report with live diagnostics.
 ```text
 › /investigate is our public endpoint actually exploitable?
 › /investigate why are pods running as root

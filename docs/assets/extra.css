@@ -54,6 +54,45 @@
   background: transparent;
 }
 
+/* Navigation tabs: clear active + hover affordances on the gradient. */
+.md-tabs__item {
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  margin: 0 0.1rem;
+  transition: background-color 140ms ease;
+}
+.md-tabs__item:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.md-tabs__link {
+  margin: 0;
+  padding: 0 0.7rem;
+  opacity: 0.82;
+  font-weight: 500;
+  transition: opacity 140ms ease;
+}
+.md-tabs__link:hover {
+  opacity: 1;
+}
+/* Active tab: full-strength label + underline indicator. */
+.md-tabs__link--active {
+  opacity: 1;
+  font-weight: 700;
+  position: relative;
+}
+.md-tabs__link--active::after {
+  content: "";
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: -0.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background: #fff;
+}
+
 /* ── Home page hero ─────────────────────────────────────────── */
 .eksr-hero {
   display: flex;

@@ -4,7 +4,7 @@ Common questions before and during adoption. Most link to a fuller answer elsewh
 
 ## Does eksreview modify my cluster?
 
-No, not unless you ask it to. It runs **read-only by default** — only `get`/`describe`/`list`-style operations. Any change happens only through `/fix` and requires an explicit confirmation before it runs. You can remove command execution entirely with `--no-shell`. See the [Safety Model](reference/safety.md).
+No, not unless you ask it to. It runs **read-only by default**, using only `get`/`describe`/`list`-style operations. Any change happens only through `/fix` and requires an explicit confirmation before it runs. You can remove command execution entirely with `--no-shell`. See the [Safety Model](reference/safety.md).
 
 ## Does my cluster data leave my machine?
 
@@ -20,7 +20,7 @@ Claude Opus (default) and Sonnet on Amazon Bedrock, via **global** cross-region 
 
 ## Does it run on Windows?
 
-macOS and Linux are supported natively. On Windows, run it under [WSL](https://learn.microsoft.com/windows/wsl/install) — the `install.sh` and `eksreview` launchers are bash scripts. See [Prerequisites](getting-started/prerequisites.md).
+macOS and Linux are supported natively. On Windows, run it under [WSL](https://learn.microsoft.com/windows/wsl/install), since the `install.sh` and `eksreview` launchers are bash scripts. See [Prerequisites](getting-started/prerequisites.md).
 
 ## Do I need to run `kubectl` or set up a kubeconfig?
 
@@ -28,7 +28,7 @@ No. eksreview connects to the Kubernetes API itself using short-lived STS tokens
 
 ## Do I need write/admin permissions?
 
-No for reviews, upgrade-readiness checks, and `/investigate` — the [read-only IAM policy](reference/permissions.md) is enough. You only need elevated permissions if you intend to apply remediations with `/fix`.
+No for reviews, upgrade-readiness checks, and `/investigate`: the [read-only IAM policy](reference/permissions.md) is enough. You only need elevated permissions if you intend to apply remediations with `/fix`.
 
 ## Can Bedrock and my EKS cluster be in different AWS accounts?
 
@@ -36,7 +36,7 @@ Yes. The model credentials are independent of the cluster credentials. Use a Bed
 
 ## Can it review more than one cluster?
 
-Yes — ask it conversationally to review several clusters in one session and it works through them one at a time. The same IAM identity must be mapped into each cluster. See [Example Prompts](usage/example-prompts.md).
+Yes. Ask it conversationally to review several clusters in one session and it works through them one at a time. The same IAM identity must be mapped into each cluster. See [Example Prompts](usage/example-prompts.md).
 
 ## A review didn't run / all checks failed. What now?
 

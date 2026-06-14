@@ -1,5 +1,7 @@
 # Credentials & Cross-Account
 
+eksreview uses your AWS credentials the same way the AWS CLI does, so if `aws sts get-caller-identity` works, you are most of the way there. The one thing worth understanding up front is that the model and the cluster can authenticate from different places. That separation is what makes the cross-account setups below possible.
+
 ## Cross-account: Bedrock in one account, EKS in another
 
 A common enterprise setup is to centralize Bedrock model access in one account while the EKS clusters live in others. eksreview supports this by using **two separate credential sources**:
@@ -28,7 +30,7 @@ Notes:
 
 ### Using a Bedrock API key
 
-Instead of access keys, you can authenticate to Bedrock with a [Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) — generate one in the Bedrock console and export it as `AWS_BEARER_TOKEN_BEDROCK`:
+Instead of access keys, you can authenticate to Bedrock with a [Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html). Generate one in the Bedrock console and export it as `AWS_BEARER_TOKEN_BEDROCK`:
 
 ```bash
 # Cluster account → EKS / EC2 / IAM / Kubernetes calls
@@ -44,12 +46,12 @@ Both **short-term** keys (expire with your session, up to 12 hours) and **long-t
 
 ### Assuming a Bedrock role in the central account
 
-eksreview does not take a role name or ARN directly — it consumes
+eksreview does not take a role name or ARN directly. It consumes
 already-resolved credentials. To use a role in the central Bedrock
 account, assume it yourself and export the temporary credentials into
 the `BEDROCK_AWS_*` variables. There are two common ways to do this.
 
-**Option A — assume the role with the AWS CLI:**
+**Option A: assume the role with the AWS CLI:**
 
 ```bash
 # Default credentials still point at the EKS cluster account
@@ -70,10 +72,10 @@ export BEDROCK_AWS_REGION=us-west-2
 ./eksreview
 ```
 
-These credentials are temporary — when they expire you'll need to
+These credentials are temporary. When they expire, you'll need to
 re-assume the role and re-export them.
 
-**Option B — let a named profile assume the role.** Define the role in
+**Option B: let a named profile assume the role.** Define the role in
 `~/.aws/config` so the SDK handles assumption (and refresh) for you:
 
 ```ini

@@ -52,6 +52,9 @@ extra_css:
 plugins:
   - search
 
+exclude_docs: |
+  adr/
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -74,12 +77,16 @@ nav:
       - Prerequisites: getting-started/prerequisites.md
       - Installation: getting-started/installation.md
       - Your First Review: getting-started/first-review.md
+      - FAQ: faq.md
   - Usage:
       - Conversational Reviews: usage/conversational-reviews.md
       - Slash Commands: usage/slash-commands.md
       - Example Prompts: usage/example-prompts.md
       - Reports: usage/reports.md
       - Knowledge Base: usage/knowledge-base.md
+      - Sample Reports:
+          - Assessment Report: examples/sample-assessment-report.md
+          - Upgrade Readiness Report: examples/sample-upgrade-readiness-report.md
   - Configuration:
       - Environment Variables: configuration/environment-variables.md
       - Models & Regions: configuration/models.md
@@ -93,23 +100,4 @@ nav:
       - Data & Cleanup: reference/data-and-cleanup.md
       - Safety Model: reference/safety.md
       - Troubleshooting: reference/troubleshooting.md
-  - Sample Reports:
-      - Assessment Report: examples/sample-assessment-report.md
-      - Upgrade Readiness Report: examples/sample-upgrade-readiness-report.md
-  - FAQ: faq.md
-  - Architecture:
-      - Overview: architecture.md
-      - Decision Records:
-          - Index: adr/README.md
-          - ADR-001 Sliding-window conversation manager: adr/001-sliding-window-conversation-manager.md
-          - ADR-002 stdio MCP transport: adr/002-stdio-mcp-not-http.md
-          - ADR-003 Two-tier orchestration: adr/003-two-tier-orchestration.md
-          - ADR-004 MCP subprocess env allowlist: adr/004-mcp-subprocess-env-allowlist.md
-          - ADR-005 Layered safety stack: adr/005-layered-safety-stack.md
-          - ADR-006 Skill-driven report compilation: adr/006-skill-driven-report-compilation.md
-          - ADR-007 --no-shell as opt-in: adr/007-no-shell-as-opt-in.md
-          - ADR-008 BM25 over embeddings: adr/008-bm25-over-embeddings.md
-          - ADR-009 Live pluto fetch with validation: adr/009-pluto-live-fetch-with-validation.md
-          - ADR-010 Process-global rate limit: adr/010-process-global-rate-limit.md
-          - ADR-011 Remove confirm_action: adr/011-remove-confirm-action-tool.md
-          - Template: adr/0000-template.md
+  - Architecture: architecture.md

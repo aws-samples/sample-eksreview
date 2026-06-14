@@ -2,7 +2,7 @@
 
 **eksreview** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
 
-Using natural language, it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability) and evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can investigate a finding, apply guided fixes step by step, and export results to a JIRA-ready CSV. Answers are grounded in a local knowledge base (the official EKS Best Practices Guide plus any docs you index), and everything runs locally and read-only by default.
+Ask for a review in plain English and it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), then evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can investigate a finding, apply guided fixes step by step, and export results to a JIRA-ready CSV. Answers are grounded in a local knowledge base (the official EKS Best Practices Guide plus any docs you index), and everything runs locally and read-only by default.
 
 📖 **Full documentation: https://aws-samples.github.io/sample-eksreview/**
 
@@ -41,10 +41,10 @@ See the [Installation guide](https://aws-samples.github.io/sample-eksreview/gett
 
 ## What you can do
 
-- **Full cluster review** across security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability — compiled into one prioritized report.
+- **Full cluster review** across security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability, compiled into one prioritized report.
 - **Upgrade readiness** assessment with a go / no-go verdict and an ordered upgrade plan.
-- **Guided remediation** (`/fix`) — one fix at a time, with confirmation before anything runs.
-- **Root cause analysis** (`/investigate`) — live read-only diagnostics beyond the static report.
+- **Guided remediation** (`/fix`): one fix at a time, with confirmation before anything runs.
+- **Root cause analysis** (`/investigate`): live read-only diagnostics beyond the static report.
 - **Trend analysis** across previous reviews, and **JIRA export** (`/export`) of findings.
 - **Local knowledge base** the agent searches and cites, plus runtime model switching (`/model`).
 
@@ -60,6 +60,6 @@ See the [Installation guide](https://aws-samples.github.io/sample-eksreview/gett
 | [Reference](https://aws-samples.github.io/sample-eksreview/reference/what-gets-checked/) | What gets checked, permissions, cost, performance, safety, troubleshooting |
 | [Architecture](https://aws-samples.github.io/sample-eksreview/architecture/) | Design, trust boundaries, and decision records |
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) (it includes the project layout and design docs).
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) (it includes the project layout and design docs).
 
 ---

@@ -1,6 +1,6 @@
 # Conversational Reviews
 
-You talk to eksreview in plain English; it decides which tools to run.
+Talk to eksreview in plain English and it works out which tools to run. There is no command syntax to memorize for everyday use.
 
 ```text
 › review my cluster eks-prod in us-east-1
@@ -8,6 +8,8 @@ You talk to eksreview in plain English; it decides which tools to run.
 › what changed in eks-prod since the last review?
 › what does the EKS Best Practices Guide say about endpoint access control?
 ```
+
+The agent picks the right action from how you phrase the request, so you can be as loose or as specific as you like. When you want exact control over a single action instead, the [slash commands](slash-commands.md) cover the same ground.
 
 ---
 

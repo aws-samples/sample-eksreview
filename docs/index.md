@@ -4,7 +4,7 @@
 
 # eksreview { .eksr-title }
 
-An AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices — in minutes.
+An AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
 { .eksr-tagline }
 
 [:material-rocket-launch: Get started](getting-started/installation.md){ .md-button .md-button--primary }
@@ -14,7 +14,7 @@ An AI-powered conversational CLI agent that reviews your Amazon EKS clusters aga
 
 Using natural language, eksreview runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), and also evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can keep the conversation going: investigate a finding to understand how it affects your cluster, apply guided fixes step by step, and export results to a JIRA-ready CSV.
 
-Its answers are grounded in a **local knowledge base** — the official EKS Best Practices Guide, plus any runbooks or docs you index — so guidance is cited rather than guessed. Behind the scenes, **skills** give the agent structured playbooks for reviewing, investigating, and compiling reports, keeping its output consistent run to run. Everything runs locally and read-only by default.
+Its answers are grounded in a **local knowledge base** (the official EKS Best Practices Guide, plus any runbooks or docs you index), so guidance is cited rather than guessed. Behind the scenes, **skills** give the agent structured playbooks for reviewing, investigating, and compiling reports, keeping its output consistent run to run. Everything runs locally and read-only by default.
 
 <div class="grid cards" markdown>
 
@@ -56,7 +56,7 @@ When you ask for a review, the heavy lifting (running checks, compiling the repo
 
 You do not need to install or run the MCP server yourself. It ships in the `mcp-server/` directory and is launched automatically via `uv`.
 
-For the trust boundaries, the layered safety stack, and the two-tier sub-agent orchestration, see the [Architecture](architecture.md) overview.
+For a high-level picture of how the pieces fit together, where everything runs, and how your cluster stays safe, see the [Architecture](architecture.md) overview.
 
 ---
 

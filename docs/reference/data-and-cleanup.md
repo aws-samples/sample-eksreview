@@ -1,6 +1,6 @@
 # Data & Cleanup
 
-eksreview writes only to three local directories (owner-only on POSIX):
+eksreview writes to three local directories only (owner-only on POSIX):
 
 | Path | Contents |
 |---|---|
@@ -13,6 +13,8 @@ Nothing is uploaded anywhere. To remove all local state:
 ```bash
 rm -rf reports/ .knowledge/ .sessions/
 ```
+
+Clearing these directories is safe at any time. The next run recreates them and re-syncs the EKS Best Practices Guide into a fresh knowledge base.
 
 ---
 

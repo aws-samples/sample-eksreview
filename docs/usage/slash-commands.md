@@ -1,5 +1,7 @@
 # Slash Commands
 
+Most of what you do in eksreview can be driven with plain language, but slash commands give you direct, precise control over a specific action. Type `/help` inside the app at any time to see them. The table below lists every command and what it does, followed by notes on the few with behavior worth knowing.
+
 | Command | Purpose |
 |---|---|
 | `/help` | Show all commands |
@@ -24,10 +26,10 @@
 
 Notes on specific commands:
 
-- **`/fix`** needs a review to have run in the current session. It pulls findings from the saved report rather than re-scanning, handles one fix at a time, and confirms before executing.
-- **`/investigate`** works even without a review in the session: it loads the most recent assessment report from `reports/` and investigates against it.
-- **`/upgrade`** accepts the cluster name plus an optional region and target version in any order, e.g. `/upgrade eks-prod us-east-1 to 1.31`. If you omit the version it auto-detects the next minor version.
-- **`/export`** uses the last report from the session, or a path you give it; with neither, it lists recent reports.
+- **`/fix`** needs a review to have run in the current session. It pulls findings from the saved report instead of re-scanning, handles one fix at a time, and confirms before it runs anything.
+- **`/investigate`** works even without a review in the session. If none has run, it loads the most recent assessment report from `reports/` and investigates against that.
+- **`/upgrade`** takes the cluster name plus an optional region and target version, in any order, e.g. `/upgrade eks-prod us-east-1 to 1.31`. Omit the version and it auto-detects the next minor version.
+- **`/export`** uses the last report from the session, or a path you give it. With neither, it lists recent reports.
 
 ---
 
