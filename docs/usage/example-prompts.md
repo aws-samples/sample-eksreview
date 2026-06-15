@@ -1,6 +1,6 @@
 # Example Prompts
 
-Every capability can be driven with natural language. Use these as a starting point; the phrasing is flexible.
+Every capability can be driven with natural language, and there is no command syntax to memorize for everyday use. The agent works out which tools to run from how you phrase the request, so you can be as loose or as specific as you like. Use the prompts below as a starting point; the wording is flexible. When you want exact control over a single action, the [slash commands](slash-commands.md) cover the same ground.
 
 **Full cluster review:** runs all checks across six domains and compiles a report.
 ```text
@@ -16,7 +16,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › just review Karpenter configuration for eks-prod
 ```
 
-**Upgrade readiness:** go or no-go assessment with an ordered upgrade plan.
+**Upgrade readiness:** go or no-go assessment with a recommended upgrade plan.
 ```text
 › is eks-prod ready to upgrade?
 › check upgrade readiness for eks-prod in us-east-1
@@ -55,7 +55,7 @@ Every capability can be driven with natural language. Use these as a starting po
 › summarize the failed networking checks
 ```
 
-**Trend analysis:** compare against previous reviews of the same cluster.
+**Trend analysis:** compare against previous reviews of the same cluster. It picks up the most recent earlier report for that cluster from the `reports/` directory, if one exists, and reports what changed.
 ```text
 › what changed in eks-prod since the last review?
 › did our compliance score improve?
@@ -91,7 +91,3 @@ Every capability can be driven with natural language. Use these as a starting po
 › /context               (show token usage and estimated cost)
 › /tools                 (list all loaded tools)
 ```
-
----
-
-**Related:** [Slash Commands](slash-commands.md) · [Reports](reports.md)

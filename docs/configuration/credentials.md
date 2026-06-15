@@ -1,10 +1,10 @@
-# Credentials & Cross-Account
+# Credentials
 
-eksreview uses your AWS credentials the same way the AWS CLI does, so if `aws sts get-caller-identity` works, you are most of the way there. The one thing worth understanding up front is that the model and the cluster can authenticate from different places. That separation is what makes the cross-account setups below possible.
+eksreview uses your AWS credentials the same way the AWS CLI does, so if `aws sts get-caller-identity` works, you are most of the way there. The one thing worth understanding up front is that the model and the cluster can authenticate from different account.
 
 ## Cross-account: Bedrock in one account, EKS in another
 
-A common enterprise setup is to centralize Bedrock model access in one account while the EKS clusters live in others. eksreview supports this by using **two separate credential sources**:
+A common enterprise setup is to centralize Bedrock model access in one account while the EKS clusters is in other accounts. eksreview supports this by using **two separate credential sources**:
 
 - **EKS / EC2 / IAM calls** use your default AWS credential chain (`AWS_PROFILE`, env keys, SSO, instance role) and `AWS_REGION`.
 - **Bedrock calls** use, in order: a Bedrock API key in `AWS_BEARER_TOKEN_BEDROCK` if set; otherwise the dedicated `BEDROCK_AWS_*` access keys if set; otherwise the same default credentials.
@@ -105,7 +105,3 @@ export BEDROCK_AWS_REGION=us-west-2
 The role in the central account needs `bedrock:InvokeModel` (and
 `bedrock:InvokeModelWithResponseStream`) on the models you use, and its
 trust policy must allow your cluster-account principal to assume it.
-
----
-
-**Related:** [Models & Regions](models.md) · [Environment Variables](environment-variables.md) · [Permissions](../reference/permissions.md)

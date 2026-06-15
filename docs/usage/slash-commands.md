@@ -30,7 +30,3 @@ Notes on specific commands:
 - **`/investigate`** works even without a review in the session. If none has run, it loads the most recent assessment report from `reports/` and investigates against that.
 - **`/upgrade`** takes the cluster name plus an optional region and target version, in any order, e.g. `/upgrade eks-prod us-east-1 to 1.31`. Omit the version and it auto-detects the next minor version.
 - **`/export`** uses the last report from the session, or a path you give it. With neither, it lists recent reports.
-
----
-
-**Related:** [Example Prompts](example-prompts.md) · [Reports](reports.md)

@@ -1,7 +1,5 @@
 # FAQ
 
-Common questions before and during adoption. Most link to a fuller answer elsewhere in the docs.
-
 ## Does eksreview modify my cluster?
 
 No, not unless you ask it to. It runs **read-only by default**, using only `get`/`describe`/`list`-style operations. Any change happens only through `/fix` and requires an explicit confirmation before it runs. You can remove command execution entirely with `--no-shell`. See the [Safety Model](reference/safety.md).
@@ -16,7 +14,11 @@ The tool is free and open source, but it calls Claude on Amazon Bedrock, so you 
 
 ## Which models does it use?
 
-Claude Opus (default) and Sonnet on Amazon Bedrock, via **global** cross-region inference profiles by default. You can switch with `/model` or pin a region with `MODEL_ID`. See [Models & Regions](configuration/models.md).
+Claude Opus (default) and Sonnet on Amazon Bedrock, via **global** inference profiles by default. You can switch with `/model` or pin a regional inference profile with `MODEL_ID`. See [Models & Regions](configuration/models.md).
+
+## Are the results deterministic?
+
+No. eksreview is powered by a generative AI model, so its analysis is non-deterministic and, to a degree, subjective. Running the same review twice can word recommendations differently, order them differently, or occasionally reach slightly different conclusions. The underlying checks that read your cluster are deterministic, but the prioritization, risk assessment, and remediation guidance the model produces are not. Treat the output as expert guidance to review and validate, not as a certified or guaranteed audit.
 
 ## Does it run on Windows?
 
@@ -24,11 +26,11 @@ macOS and Linux are supported natively. On Windows, run it under [WSL](https://l
 
 ## Do I need to run `kubectl` or set up a kubeconfig?
 
-No. eksreview connects to the Kubernetes API itself using short-lived STS tokens. You do need your IAM identity **mapped into each cluster** you review (an EKS access entry or `aws-auth`). See [Permissions](reference/permissions.md).
+No. eksreview connects to the Kubernetes API itself using the provided access details. You do need your IAM identity **mapped into each cluster** you review (an EKS access entry or `aws-auth`). See [Permissions](reference/permissions.md).
 
 ## Do I need write/admin permissions?
 
-No for reviews, upgrade-readiness checks, and `/investigate`: the [read-only IAM policy](reference/permissions.md) is enough. You only need elevated permissions if you intend to apply remediations with `/fix`.
+No. For reviews, upgrade-readiness checks, and `/investigate`, the [read-only IAM policy](reference/permissions.md) is enough. You only need elevated permissions if you intend to apply remediations with `/fix`.
 
 ## Can Bedrock and my EKS cluster be in different AWS accounts?
 
@@ -40,12 +42,4 @@ Yes. Ask it conversationally to review several clusters in one session and it wo
 
 ## A review didn't run / all checks failed. What now?
 
-Almost always a missing region, missing/wrong credentials, or a cluster the credentials can't see. See [Troubleshooting](reference/troubleshooting.md).
-
-## Is this an official AWS service?
-
-No. It's a sample provided for illustrative purposes, with no warranty or production support guarantee.
-
----
-
-**Related:** [Installation](getting-started/installation.md) · [Troubleshooting](reference/troubleshooting.md)
+This is almost always caused by a missing region, missing or wrong credentials, or a cluster your credentials can't see. See [Troubleshooting](reference/troubleshooting.md).

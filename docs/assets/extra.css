@@ -155,10 +155,17 @@
   border-radius: 2rem;
   padding: 0.55rem 1.4rem;
   font-weight: 600;
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  /* No transform on hover: moving the click target makes it jittery and
+     hard to click. Feedback comes from shadow/brightness + an active state. */
+  transition: box-shadow 150ms ease, filter 150ms ease, background-color 150ms ease;
 }
 .eksr-hero .md-button:hover {
-  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.25);
+}
+.eksr-hero .md-button:active {
+  transform: translateY(1px);
+  filter: brightness(0.98);
 }
 .eksr-hero .md-button--primary {
   background: var(--eksr-grad);

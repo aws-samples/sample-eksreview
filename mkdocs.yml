@@ -2,7 +2,7 @@ site_name: eksreview
 site_description: >-
   AI-powered conversational CLI agent that reviews Amazon EKS clusters against
   operational best practices.
-repo_name: aws-samples/sample-eksreview
+repo_name: GitHub
 repo_url: https://github.com/aws-samples/sample-eksreview
 edit_uri: edit/main/docs/
 
@@ -49,6 +49,9 @@ theme:
 extra_css:
   - assets/extra.css
 
+extra:
+  generator: false
+
 plugins:
   - search
 
@@ -79,9 +82,8 @@ nav:
       - Your First Review: getting-started/first-review.md
       - FAQ: faq.md
   - Usage:
-      - Conversational Reviews: usage/conversational-reviews.md
-      - Slash Commands: usage/slash-commands.md
       - Example Prompts: usage/example-prompts.md
+      - Slash Commands: usage/slash-commands.md
       - Reports: usage/reports.md
       - Knowledge Base: usage/knowledge-base.md
       - Sample Reports:
@@ -90,14 +92,14 @@ nav:
   - Configuration:
       - Environment Variables: configuration/environment-variables.md
       - Models & Regions: configuration/models.md
-      - Credentials & Cross-Account: configuration/credentials.md
+      - Credentials: configuration/credentials.md
       - Command-line Flags: configuration/cli-flags.md
   - Reference:
       - What Gets Checked: reference/what-gets-checked.md
       - Permissions: reference/permissions.md
       - Cost: reference/cost.md
-      - Performance & Scale: reference/performance.md
-      - Data & Cleanup: reference/data-and-cleanup.md
+      - Performance: reference/performance.md
+      - Local Data: reference/data-and-cleanup.md
       - Safety Model: reference/safety.md
       - Troubleshooting: reference/troubleshooting.md
   - Architecture: architecture.md

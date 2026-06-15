@@ -8,7 +8,3 @@ eksreview takes a couple of optional command-line flags. Pass them through the l
 | `--no-shell` | Read-only mode: removes the shell tool so the agent can never execute commands. `/fix` and `/investigate` still suggest commands and example manifests |
 
 With no flags, eksreview starts a fresh interactive session in its default read-write mode, where remediations run only after you confirm each command.
-
----
-
-**Related:** [Environment Variables](environment-variables.md) · [Safety Model](../reference/safety.md)

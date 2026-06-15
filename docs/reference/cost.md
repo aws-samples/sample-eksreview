@@ -8,7 +8,3 @@ A few ways to keep an eye on it:
 - **`/model sonnet`** switches to a cheaper, faster model mid-session.
 
 For current per-token rates, see the [Amazon Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/). The `/context` figure is a rough estimate; your AWS bill is the source of truth.
-
----
-
-**Related:** [Models & Regions](../configuration/models.md) · [Performance & Scale](performance.md)

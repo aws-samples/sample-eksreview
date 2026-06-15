@@ -1,6 +1,6 @@
 # Permissions
 
-eksreview talks to three things: the **AWS APIs** (EKS, EC2, IAM, STS), the **Kubernetes API** of each cluster, and **Amazon Bedrock** for the model. It runs read-only by default, and every change goes through a confirmation prompt, so most users only need the read-only IAM policy below.
+eksreview needs three things: the **AWS APIs** (EKS, EC2, IAM, STS), the **Kubernetes API** of each cluster, and **Amazon Bedrock** for the model. It runs read-only by default, and every change goes through a confirmation prompt, so most users only need the read-only IAM policy below.
 
 ## Read-only IAM policy (default, recommended)
 
@@ -63,13 +63,13 @@ A few of these actions support specific check domains: `autoscaling:DescribeAuto
 
 eksreview never writes to AWS or your cluster unless you run `/fix` and confirm a command. The read-only setup above is enough for everything else.
 
-If you intend to apply remediations, the principal needs **elevated permissions** scoped to what you actually fix: extra IAM actions for AWS-side changes (e.g. `eks:UpdateClusterConfig`) and/or edit-level Kubernetes RBAC for manifest changes. Grant these narrowly, prefer a **separate role**, and use the read-only policy day-to-day, switching only when remediating.
+If you intend to apply remediations, the principal needs **elevated permissions** scoped to what you actually fix: elevated IAM actions for AWS-side changes (e.g. `eks:UpdateClusterConfig`) and/or edit-level Kubernetes RBAC for manifest changes.
 
 ## Cluster access (Kubernetes RBAC)
 
-IAM gets eksreview to the AWS APIs, but reading pods, deployments, RBAC, and other in-cluster objects requires your IAM principal to be **mapped inside the cluster**. Without this, the AWS calls succeed but the Kubernetes checks fail.
+IAM gets eksreview to the AWS APIs, but reading pods, deployments, RBAC, and other in-cluster objects requires your IAM principal to be **mapped access to your cluster**. Without this, the AWS calls succeed but the Kubernetes checks fail.
 
-If you review **multiple clusters**, the same IAM principal must be granted this read access (an access entry with `AmazonEKSAdminViewPolicy`, or the equivalent `aws-auth` mapping) in **each** cluster you want to review. The mapping is per-cluster, so a principal mapped only in cluster A can describe resources in A but its Kubernetes checks will fail against cluster B until it's mapped there too. Repeat the steps below for every cluster.
+If you review **multiple clusters**, the same IAM principal must be granted this read access (an access entry with `AmazonEKSAdminViewPolicy`, or the equivalent `aws-auth` mapping) in **each** cluster you want to review. The mapping is per-cluster, so a principal mapped only in cluster A can describe resources in A but its Kubernetes checks will fail against cluster B until it's mapped there. Repeat the steps below for every cluster.
 
 Map your principal using an **EKS access entry** (recommended) or the legacy `aws-auth` ConfigMap:
 
@@ -97,7 +97,3 @@ kubectl auth can-i list pods --all-namespaces
 ```
 
 For running Bedrock and EKS in different accounts, see [Credentials & Cross-Account](../configuration/credentials.md).
-
----
-
-**Related:** [Configuration Credentials](../configuration/credentials.md) · [Safety Model](safety.md)

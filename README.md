@@ -55,7 +55,7 @@ See the [Installation guide](https://aws-samples.github.io/sample-eksreview/gett
 | Topic | |
 |---|---|
 | [Getting started](https://aws-samples.github.io/sample-eksreview/getting-started/installation/) | Install, prerequisites, your first review |
-| [Usage](https://aws-samples.github.io/sample-eksreview/usage/conversational-reviews/) | Conversational reviews, slash commands, example prompts, reports, knowledge base |
+| [Usage](https://aws-samples.github.io/sample-eksreview/usage/example-prompts/) | Example prompts, slash commands, reports, knowledge base |
 | [Configuration](https://aws-samples.github.io/sample-eksreview/configuration/environment-variables/) | Environment variables, models & regions, credentials, CLI flags |
 | [Reference](https://aws-samples.github.io/sample-eksreview/reference/what-gets-checked/) | What gets checked, permissions, cost, performance, safety, troubleshooting |
 | [Architecture](https://aws-samples.github.io/sample-eksreview/architecture/) | Design, trust boundaries, and decision records |

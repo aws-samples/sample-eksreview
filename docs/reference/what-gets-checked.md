@@ -1,6 +1,6 @@
 # What Gets Checked
 
-A full review evaluates checks across six domains. The exact number that runs depends on what's deployed (for example, Cluster Autoscaler checks that need a CA deployment are skipped on Karpenter-only clusters).
+A full review evaluates cluster across six domains. The exact number that runs depends on what's deployed (for example, Cluster Autoscaler checks that need a CA deployment are skipped on Karpenter-only clusters).
 
 | Domain | Examples |
 |---|---|
@@ -11,10 +11,6 @@ A full review evaluates checks across six domains. The exact number that runs de
 | **Cluster Autoscaler** | Version match, auto-discovery tags, least-privilege IAM, expander strategy, node group setup |
 | **Observability** | API server error/throttling rates, scheduler pending pods, etcd size, admission webhook latency |
 
-Upgrade readiness adds checks covering control plane version and support status, addon compatibility and health, deprecated API usage, third-party component compatibility, data plane readiness, and workload resilience. It ends with a go or no-go verdict and an ordered upgrade plan.
+Upgrade readiness adds checks covering control plane version and support status, addon compatibility and health, deprecated API usage, third-party component compatibility, data plane readiness, and workload resilience. It ends with a go or no-go recommendations and a upgrade plan.
 
 Each finding carries a severity (Critical / High / Medium / Low), the impacted resources, and a specific remediation.
-
----
-
-**Related:** [Example Prompts](../usage/example-prompts.md) · [Reports](../usage/reports.md)

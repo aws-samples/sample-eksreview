@@ -17,7 +17,7 @@ Every report includes:
 - **Per-finding detail:** impact, current state, and exact remediation commands
 - **Trend analysis** against previous reviews of the same cluster
 
-Reports are written to `reports/` as plain Markdown, so they are easy to share with your team or attach to tickets. They do contain cluster configuration details and IAM ARNs, so review them before sharing externally (see [Handling sensitive information](../reference/safety.md)).
+Reports are written to `reports/` as plain Markdown, so they are easy to share with your team or attach to tickets. Because they include cluster configuration details and IAM ARNs, give them a quick review before sharing them outside your organization.
 
 ## See a sample before you install
 
@@ -25,7 +25,3 @@ Want to judge the output quality first? Two real, sanitized reports ship with th
 
 - [Assessment Report](../examples/sample-assessment-report.md): a full best-practice review with executive summary, findings table, per-finding remediation, and trend analysis.
 - [Upgrade Readiness Report](../examples/sample-upgrade-readiness-report.md): a multi-hop (1.30 to 1.33) upgrade readiness assessment with a go or no-go verdict and an ordered upgrade plan.
-
----
-
-**Related:** [Slash Commands](slash-commands.md) · [Export to JIRA](../configuration/cli-flags.md) · [Safety Model](../reference/safety.md)

@@ -1,4 +1,4 @@
-# Data & Cleanup
+# Local Data
 
 eksreview writes to three local directories only (owner-only on POSIX):
 
@@ -15,7 +15,3 @@ rm -rf reports/ .knowledge/ .sessions/
 ```
 
 Clearing these directories is safe at any time. The next run recreates them and re-syncs the EKS Best Practices Guide into a fresh knowledge base.
-
----
-
-**Related:** [Safety Model](safety.md) · [Environment Variables](../configuration/environment-variables.md)

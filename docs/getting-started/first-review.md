@@ -2,7 +2,7 @@
 
 When you ask eksreview to review a cluster, it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability). The heavy lifting happens inside an ephemeral sub-agent that runs the checks and compiles them into a prioritized report, which is saved to `reports/` in a few minutes.
 
-### Example session
+### Example: cluster review
 
 ```
 › review my cluster eks-prod in us-east-1
@@ -25,6 +25,33 @@ When you ask eksreview to review a cluster, it runs best-practice checks across 
   Risk: CRITICAL. The cluster can be enumerated from the internet without credentials.
 
 › /fix restrict the endpoint to our office CIDR
+  ...
+```
+
+### Example: upgrade readiness
+
+You can also ask whether a cluster is ready to move to a new Kubernetes version. The same conversational flow applies, and the result is a go or no-go recommendation with an recommended upgrade plan.
+
+```
+› is eks-prod ready to upgrade to 1.31?
+
+  Checking upgrade readiness for eks-prod (1.30 → 1.31)...
+  ✓ control plane version & support
+  ✓ addon compatibility & health
+  ✓ deprecated API usage
+  ✓ third-party component compatibility
+  ✓ data plane readiness
+  ✓ workload resilience
+  ✓ Report compiled (38s)
+  > Report saved: reports/eks-prod-upgrade-readiness-20260608_131045.md
+
+  Recommendation: NO-GO. Two blockers must be resolved before upgrading:
+    1. Deprecated API in use: policy/v1beta1 PodDisruptionBudget (removed in 1.25+ paths)
+    2. aws-ebs-csi-driver addon below the minimum version for 1.31
+
+  Ordered plan: update the addon → migrate the deprecated API → re-run this check.
+
+› /investigate which workloads still use the deprecated PDB API?
   ...
 ```
 

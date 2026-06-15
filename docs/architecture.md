@@ -3,18 +3,18 @@
 This page gives a high-level picture of what eksreview is made of and
 how a review flows through it. You don't need any of this to use the
 tool, but it helps to know what's running on your machine and how your
-cluster and account stay safe.
+cluster and account are accessed.
 
-## The big picture
+## Overview
 
 eksreview runs entirely on your machine as a conversational CLI. When
 you ask it to review a cluster, three things work together:
 
 - **The agent** is the conversational brain. It reads your prompt,
-  decides what to do, and talks to you in plain language. It runs the
-  model on **Amazon Bedrock** (Claude, by default a global
+  decides what to do, and talks to you in natural language. It connects to the
+  model on Amazon Bedrock (Claude, by default a global
   cross-region inference profile).
-- **The review checks** run as a bundled local service that talks to
+- **The review checks** run as a bundled service (the agent's skills and an MCP server) that talks to
   the AWS APIs (EKS, EC2) and your cluster's Kubernetes API. Every
   check is read-only: it inspects configuration and reports findings,
   and never changes your cluster.
@@ -26,7 +26,7 @@ you ask it to review a cluster, three things work together:
    You  ──prompt──►  Agent  ──►  Amazon Bedrock (the model)
                        │
                        ▼
-                  Review checks  ──►  AWS APIs (EKS, EC2)
+                  Review checks (MCP)  ──►  AWS APIs (EKS, EC2)
                        │
                        ▼
                   Your cluster's Kubernetes API  (read-only)
@@ -43,23 +43,22 @@ host a service, open a network port, or send your cluster data
 anywhere except to Amazon Bedrock for the model to reason over it.
 Your AWS credentials are used the same way the AWS CLI uses them.
 
-The review checks run as a separate local process from the agent. That
+The review checks run in a separate local process from the agent (the bundled MCP server). That
 separation is deliberate: the checks get only the AWS credentials they
 need to read your cluster, and never see the credentials used to call
 Bedrock. This matters when your model and your cluster live in
-different accounts (see [Credentials & Cross-Account](configuration/credentials.md)).
+different accounts (see [Credentials](configuration/credentials.md)).
 
-## How reviews stay fast
+## Performance
 
 A full review can produce a lot of data. eksreview keeps the
 conversation responsive by collecting all the raw check results first,
-then having a short-lived helper compile them into a report on disk.
+then having a short-lived helper compile them into a report.
 Only a brief executive summary comes back into the chat. When you ask
 about a specific finding, the agent searches the saved report for the
-detail instead of holding the entire thing in memory. This is why long
-sessions and large clusters stay snappy.
+detail instead of holding the entire thing in memory.
 
-## How your cluster stays safe
+## Safety
 
 eksreview is built to review, not to change things. A few layers keep
 it that way:
@@ -85,7 +84,7 @@ it that way:
 For a deeper look at the safety model and the trade-offs the project
 accepts, see the [Safety Model](reference/safety.md) page.
 
-## Where your data lives
+## Your data
 
 eksreview stores everything under the directory you run it from:
 
@@ -97,7 +96,7 @@ eksreview stores everything under the directory you run it from:
 On macOS and Linux these directories are created owner-readable only,
 because reports can contain cluster security posture and IAM details.
 You can change where they live with `REPORTS_DIR`, `KNOWLEDGE_DIR`, and
-`SESSIONS_DIR`. See [Data & Cleanup](reference/data-and-cleanup.md) for
+`SESSIONS_DIR`. See [Local Data](reference/data-and-cleanup.md) for
 how to clear them.
 
 ## Built on
@@ -107,7 +106,3 @@ how to clear them.
 - [Amazon Bedrock](https://aws.amazon.com/bedrock/) for the model.
 - [Model Context Protocol](https://modelcontextprotocol.io/) for the
   cluster review checks.
-
----
-
-**Related:** [Safety Model](reference/safety.md) · [What Gets Checked](reference/what-gets-checked.md) · [Credentials & Cross-Account](configuration/credentials.md)

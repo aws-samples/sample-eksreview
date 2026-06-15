@@ -34,7 +34,3 @@ export SSL_CERT_FILE=/etc/ssl/certs/corp-ca.pem
 ```
 
 Both the agent and the MCP subprocess honor these.
-
----
-
-**Related:** [Models & Regions](models.md) · [Credentials & Cross-Account](credentials.md) · [Command-line Flags](cli-flags.md)

@@ -1,10 +1,10 @@
 # Models & Regions
 
-eksreview calls Anthropic Claude models on Amazon Bedrock. You need Claude Opus and/or Sonnet enabled in your Bedrock region.
+eksreview calls Anthropic Claude models on Amazon Bedrock.
 
 ## Default: global cross-region inference profiles
 
-By default the agent uses **global** cross-region inference profiles (the `global.` prefix). These route to commercial regions worldwide, so they work from any commercial region and don't require you to pin a geography. For most users this is the right choice: set your AWS credentials and a region, and you're done.
+By default the agent uses **global** cross-region inference profiles (the `global.` prefix). These route to commercial regions worldwide, so they work from any commercial region. For most users this is the right choice: set your AWS credentials and a region, and you're done.
 
 The default model is **Claude Opus 4.8** (the latest and most capable). You can switch to a faster, cheaper Sonnet model at any time, including mid-session.
 
@@ -36,13 +36,13 @@ Switching takes effect immediately for the rest of the session. See [Cost](../re
 
 ## Pinning a region with `MODEL_ID`
 
-If you need the model to run in a specific geography (for data-residency or latency reasons), set `MODEL_ID` to a **regional** system inference profile instead of relying on the global default:
+If you need the model to run in a specific geography (for data-residency or latency reasons), set `MODEL_ID` to a **regional** inference profile instead of relying on the global default:
 
 ```bash
 export MODEL_ID=us.anthropic.claude-sonnet-4-6   # pin to the US region
 ```
 
-When you pin a geography this way, subsequent `/model` switches stay in that same region (e.g. switching to Opus uses the `us.` Opus profile). The startup banner shows which scope is active: `(global)` by default, or `(us)` / `(eu)` / etc. when pinned.
+When you pin a regional endpoint this way, subsequent `/model` switches stay in that same region (e.g. switching to Opus uses the `us.` Opus profile). The startup banner shows which scope is active: `(global)` by default, or `(us)` / `(eu)` / etc. when pinned.
 
 `BEDROCK_AWS_REGION` controls which region the Bedrock API call is sent to; if unset it falls back to `AWS_REGION`.
 
@@ -52,11 +52,7 @@ When you pin a geography this way, subsequent `/model` switches stay in that sam
 |---|---|
 | The simplest setup (recommended) | Nothing; the global default works everywhere |
 | Lower cost / faster responses | `/model sonnet` (or set `MODEL_ID` to a Sonnet profile) |
-| The model pinned to a specific geography | Set `MODEL_ID` to a regional profile (e.g. `us.anthropic.…`) |
+| The model pinned to a specific regional endpoint | Set `MODEL_ID` to a regional profile (e.g. `us.anthropic.…`) |
 | Bedrock in a different account than the cluster | See [Credentials & Cross-Account](credentials.md) |
 
 Whatever you start with, you are not locked in. Model choice is a runtime decision, so you can switch with `/model` whenever the workload calls for more capability or lower cost.
-
----
-
-**Related:** [Environment Variables](environment-variables.md) · [Credentials & Cross-Account](credentials.md) · [Cost](../reference/cost.md)
