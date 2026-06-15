@@ -2,7 +2,7 @@
 
 **eksreview** is an AI-powered conversational CLI agent that reviews your Amazon EKS clusters against operational best practices in minutes.
 
-Ask for a review in plain English and it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), then evaluates **upgrade readiness** with a clear go / no-go recommendation. Every review produces a prioritized report with copy-paste remediation. From there you can investigate a finding, apply guided fixes step by step, and export results to a JIRA-ready CSV. Answers are grounded in a local knowledge base (the official EKS Best Practices Guide plus any docs you index), and everything runs locally and read-only by default.
+Ask for a review in natural language and it runs best-practice checks across six domains (security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability), then produces a prioritized report with ready-to-run remediation for every finding. It also assesses upgrade readiness, returning a clear go or no-go recommendation with a detailed upgrade plan. From there you can investigate a finding with live read-only diagnostics, apply guided fixes step by step, and export results to a JIRA-ready CSV. Answers are grounded in a local knowledge base (the official EKS Best Practices Guide plus any docs you index), and everything runs locally and read-only by default.
 
 📖 **Full documentation: https://aws-samples.github.io/sample-eksreview/**
 
@@ -27,7 +27,7 @@ export AWS_REGION=<your-region>
 ./eksreview
 ```
 
-Then, at the prompt, ask for a review in plain English:
+Then, at the prompt, ask for a review in natural language:
 
 ```text
 review my cluster my-cluster in <your-region>
@@ -42,11 +42,12 @@ See the [Installation guide](https://aws-samples.github.io/sample-eksreview/gett
 ## What you can do
 
 - **Full cluster review** across security, resiliency, networking, Karpenter, Cluster Autoscaler, and observability, compiled into one prioritized report.
-- **Upgrade readiness** assessment with a go / no-go verdict and an ordered upgrade plan.
+- **Upgrade readiness** assessment with a clear go or no-go recommendation and a detailed upgrade plan.
 - **Guided remediation** (`/fix`): one fix at a time, with confirmation before anything runs.
-- **Root cause analysis** (`/investigate`): live read-only diagnostics beyond the static report.
-- **Trend analysis** across previous reviews, and **JIRA export** (`/export`) of findings.
-- **Local knowledge base** the agent searches and cites, plus runtime model switching (`/model`).
+- **Deep analysis** (`/investigate`): live read-only diagnostics beyond the static report.
+- **JIRA export** (`/export`) of findings as an importable CSV.
+- **Local knowledge base** the agent searches and cites, plus **custom skills** (`/skill`) you can add for your own playbooks.
+- **Runtime model switching** (`/model`) and a full **read-only mode** (`--no-shell`).
 
 ---
 
@@ -58,8 +59,6 @@ See the [Installation guide](https://aws-samples.github.io/sample-eksreview/gett
 | [Usage](https://aws-samples.github.io/sample-eksreview/usage/example-prompts/) | Example prompts, slash commands, reports, knowledge base |
 | [Configuration](https://aws-samples.github.io/sample-eksreview/configuration/environment-variables/) | Environment variables, models & regions, credentials, CLI flags |
 | [Reference](https://aws-samples.github.io/sample-eksreview/reference/what-gets-checked/) | What gets checked, permissions, cost, performance, safety, troubleshooting |
-| [Architecture](https://aws-samples.github.io/sample-eksreview/architecture/) | Design, trust boundaries, and decision records |
+| [Architecture](https://aws-samples.github.io/sample-eksreview/architecture/) | How eksreview works: components, data flow, and safety |
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) (it includes the project layout and design docs).
-
----
