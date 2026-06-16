@@ -36,14 +36,14 @@ if [ -z "$PYTHON_BIN" ]; then
     exit 1
 fi
 
-# ── 2. Check uv (needed for the bundled MCP server) ──────────
-if ! command -v uv >/dev/null 2>&1; then
-    echo -e "${YELLOW}!${RESET} uv is not installed. The bundled MCP server uses uv to manage its environment."
-    echo "  Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
-    echo "  Or:           pip install uv"
-    echo "  Continuing anyway — install uv before running the agent."
-else
+# ── 2. Check uv (required for the bundled MCP server) ────────
+# Detection only here. If uv is missing we install it into the project
+# venv in step 4, because the launcher activates that venv at runtime and
+# will always find a venv-local uv (no global PATH or shell reload needed).
+if command -v uv >/dev/null 2>&1; then
     echo -e "${GREEN}✓${RESET} Found uv ($(uv --version 2>&1 | head -n 1))"
+else
+    echo -e "${YELLOW}!${RESET} uv is not on your PATH. It will be installed into the project's virtual environment."
 fi
 
 # ── 3. Create or reuse the virtual environment ───────────────
@@ -68,6 +68,23 @@ if [ "${1:-}" = "--dev" ]; then
 else
     echo "  Installing eksreview ..."
     pip install --quiet -e .
+fi
+
+# Ensure uv is available to the agent. The launcher (./eksreview) activates
+# this venv, so installing uv here guarantees it is found at runtime,
+# regardless of the global PATH or shell configuration.
+if ! command -v uv >/dev/null 2>&1; then
+    echo "  Installing uv into the virtual environment ..."
+    if pip install --quiet uv; then
+        echo -e "${GREEN}✓${RESET} Installed uv ($(uv --version 2>&1 | head -n 1))"
+    else
+        echo -e "${RED}✗${RESET} Could not install uv automatically."
+        echo "  Install it manually and re-run this script. For example:"
+        echo "    source .venv/bin/activate && pip install uv"
+        echo "    # or install it globally: curl -LsSf https://astral.sh/uv/install.sh | sh"
+        echo "    # (Homebrew users can run: brew install uv)"
+        exit 1
+    fi
 fi
 echo -e "${GREEN}✓${RESET} Dependencies installed"
 
