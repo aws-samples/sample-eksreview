@@ -2,3 +2,7 @@
 # Used locally (`pip install -r docs-requirements.txt && mkdocs serve`) and by
 # the docs GitHub Actions workflow.
 mkdocs-material>=9.5,<10.0
+
+# Security floor for transitive dependency (Dependabot alert):
+# <2.13.0 has algorithm confusion and detached-payload DoS.
+pyjwt>=2.13.0
