@@ -1,8 +1,17 @@
 # Installation
 
+There are two ways to use eksreview:
+
+1. **Full agent (recommended)** — a conversational CLI that reviews clusters, generates prioritized reports, and supports follow-up investigation and remediation.
+2. **MCP Server only** — plug the review tools into your existing AI agent (Kiro, Cursor, Amazon Q Developer CLI, VS Code, etc.) as an MCP server.
+
+---
+
+## Option 1: Full Agent
+
 Clone, run the installer, set your AWS credentials, and you can start reviewing clusters.
 
-## 60-second start
+### 60-second start
 
 You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), AWS credentials, and Amazon Bedrock model access (see [Prerequisites](prerequisites.md)).
 
@@ -52,6 +61,158 @@ python main.py
 ### Bedrock and EKS in different accounts
 
 If your Bedrock model access lives in one account and your EKS clusters in another, you can point the cluster calls at one account and Bedrock at the other. The MCP sub-process that talks to your cluster only uses the `AWS_*` credentials, while Bedrock calls can use a separate credential source. See [Credentials](../configuration/credentials.md) for step-by-step setup, including using a Bedrock API key and assuming a role in a central account.
+
+---
+
+## Option 2: MCP Server Only (Use with Your Existing AI Agent)
+
+If you already have an AI agent you prefer (Kiro, Cursor, Amazon Q Developer CLI, VS Code Copilot, etc.), you can add the EKS Review MCP Server as a tool source. The MCP server provides the same best-practice checks that power the full agent, exposed as MCP tools your agent can call.
+
+!!! info "What you get with the MCP Server"
+    The MCP Server **performs cluster reviews** — it runs the same best-practice checks as the full agent across security, resiliency, networking, Karpenter, Cluster Autoscaler, and upgrade readiness. Your AI agent can call these tools, interpret the structured results, and help you act on findings.
+
+    **What is not supported** with the MCP Server alone:
+
+    - Automated report generation and formatting (your agent composes the output based on your prompt)
+    - Review history and trend analysis across runs
+    - Built-in `/investigate` and `/fix` slash commands
+    - Knowledge base persistence
+
+    For those capabilities, use the [full agent](#option-1-full-agent) instead.
+
+### Setup
+
+You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), and AWS credentials with [read-only EKS permissions](../reference/permissions.md).
+
+Add the following to your agent's MCP configuration:
+
+=== "Kiro"
+
+    Create or edit `.kiro/settings/mcp.json` in your workspace:
+
+    ```json
+    {
+      "mcpServers": {
+        "eks-review": {
+          "command": "uvx",
+          "args": ["awslabs.eks-review-mcp-server@latest"],
+          "env": {
+            "FASTMCP_LOG_LEVEL": "ERROR"
+          },
+          "disabled": false
+        }
+      }
+    }
+    ```
+
+=== "Amazon Q Developer CLI"
+
+    Edit your Q Developer CLI MCP configuration (`~/.aws/amazonq/mcp.json`):
+
+    ```json
+    {
+      "mcpServers": {
+        "awslabs.eks-review-mcp-server": {
+          "command": "uvx",
+          "args": ["awslabs.eks-review-mcp-server@latest"],
+          "env": {
+            "FASTMCP_LOG_LEVEL": "ERROR"
+          },
+          "autoApprove": [],
+          "disabled": false
+        }
+      }
+    }
+    ```
+
+=== "Cursor / VS Code"
+
+    Add to your project's `.cursor/mcp.json` or VS Code MCP settings:
+
+    ```json
+    {
+      "mcpServers": {
+        "awslabs.eks-review-mcp-server": {
+          "command": "uvx",
+          "args": ["awslabs.eks-review-mcp-server@latest"],
+          "env": {
+            "FASTMCP_LOG_LEVEL": "ERROR"
+          },
+          "disabled": false
+        }
+      }
+    }
+    ```
+
+!!! tip
+    On Windows, replace `"command": "uvx"` with `"command": "uvx"` and add `"--from", "awslabs.eks-review-mcp-server@latest", "awslabs.eks-review-mcp-server.exe"` as args. See the [MCP Server README](https://github.com/awslabs/mcp) for full Windows configuration.
+
+### Available Tools
+
+Once connected, your agent gains access to these tools:
+
+| Tool | What it checks |
+|------|----------------|
+| `check_eks_security` | IAM, RBAC, pod security, encryption, secrets, runtime security |
+| `check_eks_resiliency` | Replicas, probes, PDBs, HPA/VPA, control plane, data plane (28 checks) |
+| `check_eks_networking` | Endpoint access, multi-AZ distribution, VPC/subnet/SG configuration |
+| `check_karpenter_best_practices` | NodePool config, instance selection, spot optimization, disruption |
+| `check_cluster_autoscaler_best_practices` | CA deployment, version compatibility, node groups, scaling |
+| `check_eks_upgrade_readiness` | Deprecated APIs, addon compatibility, data plane, workload readiness (38 checks) |
+
+All tools accept `cluster_name` (required) and optionally `region` or `namespace`.
+
+### Sample Prompts
+
+Use these prompts with your AI agent to review clusters using the MCP server tools.
+
+#### Quick Review
+
+A simple, natural-language prompt that lets your agent decide which tools to call:
+
+```text
+Review my EKS cluster "my-cluster" in us-east-1 for best practices.
+Summarize the findings, highlight anything critical, and suggest what to fix first.
+```
+
+#### Cluster Review (Assessment Report)
+
+```text
+Run a comprehensive EKS best-practices review of my cluster "my-cluster" in us-east-1.
+Call all five check tools (security, resiliency, networking, karpenter, cluster-autoscaler).
+
+Then compile the results into a single assessment report with:
+- An executive summary with pass/fail counts and overall compliance assessment
+- A check results summary table (S.No, Check Name, Category, Severity, Status, Impacted Resources)
+- Separate sections for Critical, High, Medium, and Low findings — each with impact,
+  impacted resources, current state, remediation (commands/YAML), and considerations
+- A "Quick Wins" table for items fixable in under 30 minutes
+- A "Requires Planning" section for items needing a maintenance window
+
+Save the report as a markdown file.
+```
+
+#### Upgrade Readiness
+
+```text
+Check if my cluster "my-cluster" in us-east-1 is ready to upgrade to Kubernetes 1.32.
+Use the check_eks_upgrade_readiness tool.
+
+Then compile the results into an upgrade readiness report with:
+- A summary table (current version, target version, region, date, readiness verdict,
+  upgrade path, checks run, passed, blockers, warnings)
+- A Go/No-Go decision paragraph explaining any blockers
+- A check results summary table (ID, Check, Category, Severity, Status, Timing, Impacted Resources)
+- Detailed sections for each blocker and warning with remediation steps
+- A recommended upgrade plan with ordered steps
+
+Save the report as a markdown file.
+```
+
+!!! note "Prompt quality matters"
+    The MCP server returns raw check data. The report quality depends entirely on how well you prompt your agent. The prompts above are tuned to produce output similar to the full agent's reports — adjust them to your team's format as needed.
+
+---
 
 ## Updating
 
