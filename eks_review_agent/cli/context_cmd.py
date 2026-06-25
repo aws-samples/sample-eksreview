@@ -24,7 +24,7 @@ def estimate_session_cost(agent) -> float:
     return estimate_cost(main_usage, model_name) + estimate_cost(sub_usage, model_name)
 
 
-def handle_context(agent) -> str:
+def handle_context(agent, skills_plugin=None) -> str:
     """Build the multi-line /context output."""
     from eks_review_agent.orchestration.subagent_pipeline import get_subagent_usage
 
@@ -77,6 +77,15 @@ def handle_context(agent) -> str:
     if sub_total > 0:
         lines.append(f"  Sub-agents: {sub_total:,} tokens  |  Combined: {combined:,}")
     lines.append(f"  Cost:    ~${cost:.4f}")
+
+    if skills_plugin is not None:
+        skill_list = skills_plugin.get_available_skills(agent)
+        if skill_list:
+            names = ", ".join(s.name for s in skill_list)
+            lines.append(f"  Skills:  {names}")
+        else:
+            lines.append("  Skills:  none loaded")
+
     if pct > 80:
         lines.append(f"  {color}Context getting full — consider starting a new session.{RESET}")
     lines.append("")

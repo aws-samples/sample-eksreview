@@ -126,7 +126,7 @@ HELP_TEXT = """\
     /help                Show this help text
     /tools               List all available tools
     /model               Show or switch the active model
-    /context             Show context window usage
+    /context             Show context window usage, cost, and loaded skills
     /skill list          Show all loaded skills
     /skill add <n> <p>   Add a custom skill from path
     /skill remove <n>    Remove a custom skill

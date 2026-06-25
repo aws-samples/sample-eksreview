@@ -109,12 +109,6 @@ def _print_status(agent, mcp_tools, skills_plugin, session_id: str | None) -> No
     ):
         print("  Mode:           --no-shell (read-only, shell tool disabled)")
 
-    skill_names = [s.name for s in skills_plugin.get_available_skills()]
-    if skill_names:
-        print(f"  Skills:         {', '.join(skill_names)}")
-    else:
-        print("  Skills:         none")
-
     # Auto-sync EKS Best Practices into the knowledge base
     kb = get_knowledge_base()
     try:

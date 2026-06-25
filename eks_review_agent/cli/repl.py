@@ -83,7 +83,7 @@ def conversation_loop(agent, obs_plugin, skills_plugin, builtin_names) -> None:
             continue
 
         if cmd == "/context":
-            print(handle_context(agent))
+            print(handle_context(agent, skills_plugin))
             continue
 
         if cmd == "/tools":
