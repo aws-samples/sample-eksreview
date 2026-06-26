@@ -43,6 +43,9 @@ htmlcov/
 # macOS
 .DS_Store
 
+# Scratch / drafts (not for version control)
+temp.md
+
 # Kiro
 .kiro/
 
