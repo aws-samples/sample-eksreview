@@ -3,7 +3,7 @@
 There are two ways to use eksreview:
 
 1. **Full agent (recommended)** — a conversational CLI that reviews clusters, generates prioritized reports, and supports follow-up investigation and remediation.
-2. **MCP Server only** — plug the review tools into your existing AI agent (Kiro, Cursor, Amazon Q Developer CLI, VS Code, etc.) as an MCP server.
+2. **MCP Server only** — plug the review tools into your existing AI agent (Kiro, or any agent that supports MCP) as a local MCP server.
 
 ---
 
@@ -66,7 +66,7 @@ If your Bedrock model access lives in one account and your EKS clusters in anoth
 
 ## Option 2: MCP Server Only (Use with Your Existing AI Agent)
 
-If you already have an AI agent you prefer (Kiro, Cursor, Amazon Q Developer CLI, VS Code Copilot, etc.), you can add the EKS Review MCP Server as a tool source. The MCP server provides the same best-practice checks that power the full agent, exposed as MCP tools your agent can call.
+If you already have an AI agent you prefer (Kiro, or any other agent that supports [MCP](https://modelcontextprotocol.io/)), you can add the EKS Review MCP Server as a tool. The MCP server provides the same best-practice checks that power the full agent, exposed as MCP tools your agent can call.
 
 !!! info "What you get with the MCP Server"
     The MCP Server **performs cluster reviews** — it runs the same best-practice checks as the full agent across security, resiliency, networking, Karpenter, Cluster Autoscaler, and upgrade readiness. Your AI agent can call these tools, interpret the structured results, and help you act on findings.
@@ -82,70 +82,44 @@ If you already have an AI agent you prefer (Kiro, Cursor, Amazon Q Developer CLI
 
 ### Setup
 
-You need Python 3.10+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), and AWS credentials with [read-only EKS permissions](../reference/permissions.md).
+You need [`uv`](https://docs.astral.sh/uv/getting-started/installation/) and AWS credentials with [read-only EKS permissions](../reference/permissions.md).
 
-Add the following to your agent's MCP configuration:
+**1. Clone the repository:**
 
-=== "Kiro"
+```bash
+git clone https://github.com/aws-samples/sample-eksreview.git
+```
 
-    Create or edit `.kiro/settings/mcp.json` in your workspace:
+**2. Add the MCP server to your Kiro configuration:**
 
-    ```json
-    {
-      "mcpServers": {
-        "eks-review": {
-          "command": "uvx",
-          "args": ["awslabs.eks-review-mcp-server@latest"],
-          "env": {
-            "FASTMCP_LOG_LEVEL": "ERROR"
-          },
-          "disabled": false
-        }
-      }
+Create or edit `.kiro/settings/mcp.json` in your workspace (or `~/.kiro/settings/mcp.json` for global access):
+
+```json
+{
+  "mcpServers": {
+    "awslabs.eks-review-mcp-server": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/sample-eksreview/mcp-server/awslabs/eks_review_mcp_server",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false
     }
-    ```
+  }
+}
+```
 
-=== "Amazon Q Developer CLI"
+Replace `/absolute/path/to/sample-eksreview/mcp-server/awslabs/eks_review_mcp_server` with the absolute path to the `mcp-server/awslabs/eks_review_mcp_server/` directory in your clone.
 
-    Edit your Q Developer CLI MCP configuration (`~/.aws/amazonq/mcp.json`):
+Once saved, Kiro auto-detects the config change and connects to the MCP server. 
 
-    ```json
-    {
-      "mcpServers": {
-        "awslabs.eks-review-mcp-server": {
-          "command": "uvx",
-          "args": ["awslabs.eks-review-mcp-server@latest"],
-          "env": {
-            "FASTMCP_LOG_LEVEL": "ERROR"
-          },
-          "autoApprove": [],
-          "disabled": false
-        }
-      }
-    }
-    ```
-
-=== "Cursor / VS Code"
-
-    Add to your project's `.cursor/mcp.json` or VS Code MCP settings:
-
-    ```json
-    {
-      "mcpServers": {
-        "awslabs.eks-review-mcp-server": {
-          "command": "uvx",
-          "args": ["awslabs.eks-review-mcp-server@latest"],
-          "env": {
-            "FASTMCP_LOG_LEVEL": "ERROR"
-          },
-          "disabled": false
-        }
-      }
-    }
-    ```
-
-!!! tip
-    On Windows, replace `"command": "uvx"` with `"command": "uvx"` and add `"--from", "awslabs.eks-review-mcp-server@latest", "awslabs.eks-review-mcp-server.exe"` as args. See the [MCP Server README](https://github.com/awslabs/mcp) for full Windows configuration.
+!!! note "Other MCP-compatible agents"
+    This configuration works with any AI agent that supports the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The `command` and `args` are the same — adapt the JSON to your agent's MCP configuration format.
 
 ### Available Tools
 
@@ -216,12 +190,23 @@ Save the report as a markdown file.
 
 ## Updating
 
+### Full Agent
+
 eksreview is run from a clone, so update with `git pull` and re-run the installer to pick up any new updates:
 
 ```bash
-cd eksreview
+cd sample-eksreview
 git pull
 ./install.sh
+```
+
+### MCP Server
+
+Pull the latest changes — Kiro will pick up the updated server automatically on next reconnect:
+
+```bash
+cd sample-eksreview
+git pull
 ```
 
 ## Uninstalling
@@ -229,10 +214,10 @@ git pull
 Remove the virtual environment and (optionally) the local data directories, then delete the clone:
 
 ```bash
-cd eksreview
+cd sample-eksreview
 rm -rf .venv                      # the installed environment
 rm -rf reports/ .knowledge/ .sessions/   # optional: generated data (see Data & Cleanup)
-cd .. && rm -rf eksreview         # the clone itself
+cd .. && rm -rf sample-eksreview  # the clone itself
 ```
 
 Nothing is installed outside the project directory, so removing the clone leaves no residue in the project. One exception: `uv` may keep a package cache under `~/.cache/uv` (shared with other uv projects; safe to leave or clear with `uv cache clean`).
